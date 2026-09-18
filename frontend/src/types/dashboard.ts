@@ -182,6 +182,11 @@ export interface DashboardAnalyticsResponse {
 /** Time range filter for historical analytics views. */
 export type AnalyticsTimeRange = '1y' | '3y' | '5y' | 'all';
 
+/** Spec-literal alias for `AnalyticsTimeRange` — kept as an alias rather
+ * than a duplicate type so `TimeRangeFilter`/`filterByTimeRange` and any
+ * spec-facing code can both reference a single source of truth. */
+export type TimeRange = AnalyticsTimeRange;
+
 export type SiteEventType = 'created' | 'updated' | 'boundary_saved' | 'analytics_synced';
 
 export interface SiteEvent {

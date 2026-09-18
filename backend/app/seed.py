@@ -11,16 +11,28 @@ Behavior:
   several projects, each with a few sites with real, valid, distinct
   polygons so their PostGIS-computed area/perimeter/centroid values are
   genuine, not hardcoded.
-- All data is clearly labeled as demo data in its names/descriptions. No
-  fabricated carbon/biodiversity/environmental measurements are included
-  — this seeds only the geospatial project/site foundation, consistent
-  with the rest of this feature.
+- All data is clearly labeled as demo data in its names/descriptions.
+- For the seeded `[DEMO]` sites only, also seeds one `site_metrics` row
+  per year from 2022-2026 (carbon/biodiversity/vegetation/tree-cover),
+  purely so the Environmental Analytics charts have something to render
+  out of the box. These are explicitly SYNTHETIC values — a smooth
+  illustrative upward trend, not real measurements of any kind — and the
+  frontend labels any site whose name starts with "[DEMO]" with a visible
+  "Demo data" badge on every analytics chart so this is never presented
+  as real environmental data (see SiteAnalyticsPage.tsx's `isDemoData`
+  prop). Real, non-demo sites created by users are never auto-seeded with
+  metrics — those must be entered via the Add Measurement UI.
 """
+
+from datetime import date
+
+from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.db.session import SessionLocal
 from app.models.project import Project
 from app.models.site import Site
+from app.models.site_metric import SiteMetric
 from app.models.user import User
 from app.services.geospatial_service import compute_geometry_summary, geojson_to_shape, shape_to_ewkt_element
 
@@ -32,6 +44,42 @@ DEMO_NAME = "Darukaa Demo"
 def _polygon(coords: list[list[float]]) -> dict:
     ring = coords + [coords[0]]
     return {"type": "Polygon", "coordinates": [ring]}
+
+
+# Synthetic, illustrative-only yearly environmental measurements for demo
+# sites (2022-2026). Each site gets a distinct starting point (varied by
+# a small per-site offset below) but the same smooth upward-trend shape,
+# so every seeded chart has visible, non-flat historical movement without
+# pretending to be a real measurement campaign.
+_DEMO_METRIC_YEARS: list[tuple[int, float, float, float, float]] = [
+    # year, carbon_tco2e, biodiversity_score, vegetation_index, tree_cover_percentage
+    (2022, 120.5, 62.0, 0.54, 48.0),
+    (2023, 138.2, 66.5, 0.58, 51.5),
+    (2024, 152.8, 69.0, 0.61, 54.0),
+    (2025, 168.4, 72.0, 0.65, 58.0),
+    (2026, 184.9, 75.5, 0.69, 62.0),
+]
+
+
+def _seed_demo_metrics(db: Session, site: Site, offset_index: int) -> None:
+    """Seeds one synthetic yearly measurement per year for a single demo
+    site. `offset_index` (the site's position within its project) nudges
+    the base values slightly so sibling demo sites don't render identical
+    charts.
+    """
+    bump = 1.0 + (offset_index * 0.08)
+    for year, carbon, bio, veg, tree in _DEMO_METRIC_YEARS:
+        db.add(
+            SiteMetric(
+                site_id=site.id,
+                recorded_at=date(year, 1, 1),
+                carbon_tco2e=round(carbon * bump, 2),
+                biodiversity_score=min(round(bio * bump, 2), 100.0),
+                vegetation_index=min(round(veg * bump, 3), 1.0),
+                tree_cover_percentage=min(round(tree * bump, 2), 100.0),
+            )
+        )
+    db.commit()
 
 
 DEMO_PROJECTS: list[dict] = [
@@ -122,7 +170,7 @@ def seed() -> None:
             db.refresh(project)
             print(f"Created project: {project.name}")
 
-            for site_data in sites_data:
+            for site_index, site_data in enumerate(sites_data):
                 geom = geojson_to_shape(site_data["geometry"])
                 summary = compute_geometry_summary(db, geom)
                 site = Site(
@@ -138,7 +186,11 @@ def seed() -> None:
                 )
                 db.add(site)
                 db.commit()
+                db.refresh(site)
                 print(f"  Created site: {site.name} ({summary.area_hectares} ha)")
+
+                _seed_demo_metrics(db, site, site_index)
+                print(f"    Seeded {len(_DEMO_METRIC_YEARS)} synthetic yearly measurements (2022-2026, demo only)")
 
         print("\nSeed complete.")
     finally:

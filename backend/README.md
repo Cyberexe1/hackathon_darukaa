@@ -126,9 +126,18 @@ distinct polygons (so their area/perimeter/centroid are genuinely
 computed by PostGIS, not hardcoded numbers). **Idempotent and safe**: it
 checks whether any project already exists in the database first and
 does nothing if so — it will never duplicate data or touch existing
-records. No environmental measurements (carbon, biodiversity, etc.) are
-seeded, since that data isn't fabricated anywhere in this app — only the
-geospatial project/site foundation is seeded.
+records.
+
+For the seeded `[DEMO]` sites only, it also seeds one `site_metrics` row
+per year from 2022 through 2026 (carbon, biodiversity, vegetation index,
+tree cover), so the Environmental Analytics page has historical data to
+chart out of the box. **These values are explicitly synthetic** — a
+smooth illustrative trend, not real measurements of any kind — and the
+frontend (`SiteAnalyticsPage.tsx`) shows a visible "Demo data" badge on
+every analytics chart for any site whose name starts with `[DEMO]`, so
+this is never presented as a real environmental measurement. Real,
+non-demo sites created by a signed-in user are never auto-seeded with
+metrics — those are entered through the app's own Add Measurement UI.
 
 ## Run the dev server
 

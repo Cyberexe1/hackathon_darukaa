@@ -36,6 +36,9 @@ export function SiteTable({ sites, showProjectColumn = true }: SiteTableProps) {
                 Area
               </th>
               <th scope="col" className="py-space-sm px-space-md">
+                Created
+              </th>
+              <th scope="col" className="py-space-sm px-space-md">
                 Carbon
               </th>
               <th scope="col" className="py-space-sm px-space-md">
@@ -69,6 +72,13 @@ export function SiteTable({ sites, showProjectColumn = true }: SiteTableProps) {
                   )}
                   <td className="py-space-md px-space-md text-primary font-medium">
                     {site.area_hectares.toLocaleString()} ha
+                  </td>
+                  <td className="py-space-md px-space-md text-on-surface-variant whitespace-nowrap">
+                    {new Date(site.created_at).toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
                   </td>
                   <td className="py-space-md px-space-md text-on-surface-variant">—</td>
                   <td className="py-space-md px-space-md text-on-surface-variant">—</td>
@@ -108,6 +118,16 @@ export function SiteTable({ sites, showProjectColumn = true }: SiteTableProps) {
                 Area:{' '}
                 <span className="text-primary font-medium">
                   {site.area_hectares.toLocaleString()} ha
+                </span>
+              </span>
+              <span>
+                Created:{' '}
+                <span className="text-primary font-medium">
+                  {new Date(site.created_at).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
                 </span>
               </span>
             </div>

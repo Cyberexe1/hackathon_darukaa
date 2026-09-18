@@ -71,8 +71,34 @@ export function SiteAnalyticsPage() {
   const [deleteSiteError, setDeleteSiteError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!siteId || cachedSite) return;
+    if (!siteId) return;
+
+    if (cachedSite) {
+      // The new siteId is already in the store (e.g. navigated here from
+      // a page that already fetched it) — nothing to fetch, and any
+      // stale `fetchedSite`/error from a *previous* siteId must be
+      // cleared immediately rather than left rendering while `site`
+      // below falls back to `cachedSite` anyway. This synchronizes
+      // local state with the `siteId` route param (an external input),
+      // not state derivable from props during render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFetchedSite(undefined);
+      setIsFetchingSite(false);
+      setSiteError(null);
+      return;
+    }
+
     let cancelled = false;
+    // Clear the *previous* site's data synchronously before starting the
+    // new fetch — without this, navigating directly from one site's
+    // details page to another uncached site briefly renders the old
+    // site's name/polygon/area/perimeter (from stale `fetchedSite`) while
+    // the new site's analytics are already being requested, producing a
+    // visibly mismatched page.
+    setFetchedSite(undefined);
+    setIsFetchingSite(true);
+    setSiteError(null);
+
     fetchSiteById(siteId)
       .then((s) => {
         if (!cancelled) setFetchedSite(s);
@@ -187,11 +213,14 @@ export function SiteAnalyticsPage() {
   if (isLoadingSite) {
     return (
       <DashboardLayout pageTitle="Loading…">
-        <div className="p-4 md:p-space-lg max-w-[1600px] mx-auto flex items-center justify-center">
+        <div className="p-4 md:p-space-lg max-w-[1600px] mx-auto flex flex-col items-center justify-center gap-space-sm py-space-xl">
           <span
             className="w-10 h-10 rounded-full border-3 border-surface-tint/30 border-t-surface-tint animate-spin"
             aria-hidden="true"
           />
+          <p role="status" className="font-body-sm text-body-sm text-on-surface-variant">
+            Loading site details&hellip;
+          </p>
         </div>
       </DashboardLayout>
     );
@@ -212,6 +241,11 @@ export function SiteAnalyticsPage() {
   }
 
   const hasMetrics = Boolean(analytics && analytics.historical.length > 0);
+  // Seeded demo sites are always named with a "[DEMO]" prefix (see
+  // backend/app/seed.py) — surface that as a visible badge on every
+  // chart so synthetic illustrative data is never mistaken for a real
+  // environmental measurement.
+  const isDemoSite = site.name.startsWith('[DEMO]');
 
   return (
     <DashboardLayout pageTitle={site.name}>
@@ -365,7 +399,7 @@ export function SiteAnalyticsPage() {
             fitBoundsToSites
             showLayerControl={false}
           />
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-space-sm mt-space-sm px-space-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-space-sm mt-space-sm px-space-sm">
             <div className="p-space-sm bg-surface-container-low rounded-lg">
               <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">
                 Area
@@ -396,6 +430,18 @@ export function SiteAnalyticsPage() {
               </span>
               <span className="font-headline-sm text-headline-sm text-primary">
                 {new Date(site.created_at).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </span>
+            </div>
+            <div className="p-space-sm bg-surface-container-low rounded-lg">
+              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">
+                Updated
+              </span>
+              <span className="font-headline-sm text-headline-sm text-primary">
+                {new Date(site.updated_at).toLocaleDateString(undefined, {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric',
@@ -455,10 +501,10 @@ export function SiteAnalyticsPage() {
         {!isLoadingAnalytics && !analyticsError && hasMetrics && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-              <CarbonChart data={chartData.carbon} />
-              <BiodiversityChart data={chartData.biodiversity} />
-              <VegetationChart data={chartData.vegetation} />
-              <TreeCoverChart data={chartData.treeCover} />
+              <CarbonChart data={chartData.carbon} isDemoData={isDemoSite} />
+              <BiodiversityChart data={chartData.biodiversity} isDemoData={isDemoSite} />
+              <VegetationChart data={chartData.vegetation} isDemoData={isDemoSite} />
+              <TreeCoverChart data={chartData.treeCover} isDemoData={isDemoSite} />
             </div>
 
             {analytics && (

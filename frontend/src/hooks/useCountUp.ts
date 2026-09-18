@@ -25,6 +25,14 @@ export function useCountUp<T extends HTMLElement = HTMLDivElement>({
 
   useEffect(() => {
     const node = ref.current;
+    // Tracked here (rather than only as a local inside `animate`) so the
+    // effect's cleanup can always clear it, on every code path —
+    // previously the early-return branch below (no IntersectionObserver/
+    // `triggerOnView` false, e.g. always true in jsdom test environments)
+    // never returned a cleanup function at all, so the interval kept
+    // firing `setValue` after the component unmounted, occasionally
+    // crashing test teardown with "window is not defined".
+    let timer: ReturnType<typeof setInterval> | undefined;
 
     const animate = () => {
       if (hasAnimated.current) return;
@@ -35,7 +43,7 @@ export function useCountUp<T extends HTMLElement = HTMLDivElement>({
       const increment = target / steps;
       let current = 0;
 
-      const timer = setInterval(() => {
+      timer = setInterval(() => {
         current += increment;
         if (current >= target) {
           setValue(target);
@@ -48,7 +56,7 @@ export function useCountUp<T extends HTMLElement = HTMLDivElement>({
 
     if (!triggerOnView || !node || !('IntersectionObserver' in window)) {
       animate();
-      return;
+      return () => clearInterval(timer);
     }
 
     const observer = new IntersectionObserver(
@@ -62,7 +70,10 @@ export function useCountUp<T extends HTMLElement = HTMLDivElement>({
     );
     observer.observe(node);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearInterval(timer);
+    };
   }, [target, duration, triggerOnView]);
 
   return { ref, value };

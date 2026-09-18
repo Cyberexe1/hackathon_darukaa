@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { SiteAnalyticsPage } from './SiteAnalyticsPage';
 import type { Site, SiteAnalyticsResponse } from '../../types/dashboard';
 
@@ -345,5 +345,111 @@ describe('SiteAnalyticsPage', () => {
     await user.click(confirmButtons[confirmButtons.length - 1]);
 
     await waitFor(() => expect(mockDeleteSite).toHaveBeenCalledWith('site-1'));
+  });
+
+  it('shows a "Loading site details" state before the site itself resolves', async () => {
+    mockGetSiteById.mockReset().mockReturnValue(undefined);
+    let resolveSite: (value: Site) => void = () => {};
+    mockFetchSiteById.mockReset().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveSite = resolve;
+        }),
+    );
+    mockGetSiteAnalytics.mockResolvedValue(makeAnalytics());
+    renderPage();
+
+    expect(await screen.findByText(/Loading site details/i)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Test Site A', level: 2 }),
+    ).not.toBeInTheDocument();
+
+    resolveSite(TEST_SITE);
+    await screen.findByRole('heading', { name: 'Test Site A', level: 2 });
+  });
+
+  it('shows an error state with retry when the site itself fails to load', async () => {
+    mockGetSiteById.mockReset().mockReturnValue(undefined);
+    mockFetchSiteById.mockReset().mockRejectedValue(new Error('site fetch failed'));
+    renderPage();
+
+    expect(await screen.findByText(/Unable to load site data/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+  });
+
+  it('shows all four latest KPI values from the analytics response', async () => {
+    mockGetSiteAnalytics.mockResolvedValue(makeAnalytics());
+    renderPage();
+
+    await screen.findByRole('heading', { name: 'Test Site A', level: 2 });
+
+    expect(await screen.findByText(/205.4/)).toBeInTheDocument(); // Carbon
+    expect(screen.getByText(/74.2/)).toBeInTheDocument(); // Biodiversity
+    expect(screen.getAllByText('0.68').length).toBeGreaterThan(0); // Vegetation
+    expect(screen.getAllByText(/61%/).length).toBeGreaterThan(0); // Tree cover
+  });
+
+  it('does not leak the previous site data when navigating to a different, uncached site', async () => {
+    const OTHER_SITE: Site = {
+      ...TEST_SITE,
+      id: 'site-2',
+      name: 'Other Site B',
+      area_hectares: 99.9,
+    };
+
+    // First render: site-1 is already cached, resolves immediately.
+    mockGetSiteById
+      .mockReset()
+      .mockImplementation((id: string) => (id === 'site-1' ? TEST_SITE : undefined));
+    // site-2 is *not* cached — fetchSiteById must be awaited, and control
+    // exactly when it resolves so the intermediate render can be checked.
+    let resolveOther: (value: Site) => void = () => {};
+    mockFetchSiteById.mockReset().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveOther = resolve;
+        }),
+    );
+    mockGetSiteAnalytics.mockResolvedValue(makeAnalytics());
+
+    // A real, in-app navigation (via `<Link>`, same as the site's own
+    // breadcrumb/back links use) is required here — a MemoryRouter's
+    // `initialEntries` only applies once at construction, so re-rendering
+    // with different `initialEntries` would NOT reproduce real client-
+    // side navigation between two mounted instances of this page.
+    render(
+      <MemoryRouter initialEntries={['/sites/site-1']}>
+        <Routes>
+          <Route
+            path="/sites/:siteId"
+            element={
+              <>
+                <Link to="/sites/site-2">Go to Other Site B</Link>
+                <SiteAnalyticsPage />
+              </>
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+    await screen.findByRole('heading', { name: 'Test Site A', level: 2 });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('link', { name: /go to other site b/i }));
+
+    // While site-2's fetch is still pending, the old site's name must not
+    // still be on screen — the page should show its loading state
+    // instead of stale content from site-1.
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('heading', { name: 'Test Site A', level: 2 }),
+      ).not.toBeInTheDocument();
+    });
+    expect(screen.getByText(/Loading site details/i)).toBeInTheDocument();
+
+    resolveOther(OTHER_SITE);
+    expect(
+      await screen.findByRole('heading', { name: 'Other Site B', level: 2 }),
+    ).toBeInTheDocument();
   });
 });
