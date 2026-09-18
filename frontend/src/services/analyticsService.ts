@@ -19,7 +19,9 @@ export const analyticsService = {
   },
 
   async getProjectAnalytics(projectId: string): Promise<ProjectAnalyticsResponse> {
-    const { data } = await apiClient.get<ProjectAnalyticsResponse>(`/projects/${projectId}/analytics`);
+    const { data } = await apiClient.get<ProjectAnalyticsResponse>(
+      `/projects/${projectId}/analytics`,
+    );
     return data;
   },
 
@@ -38,8 +40,15 @@ export const analyticsService = {
     return data;
   },
 
-  async updateMetric(siteId: string, metricId: string, input: Partial<SiteMetricInput>): Promise<SiteMetric> {
-    const { data } = await apiClient.patch<SiteMetric>(`/sites/${siteId}/metrics/${metricId}`, input);
+  async updateMetric(
+    siteId: string,
+    metricId: string,
+    input: Partial<SiteMetricInput>,
+  ): Promise<SiteMetric> {
+    const { data } = await apiClient.patch<SiteMetric>(
+      `/sites/${siteId}/metrics/${metricId}`,
+      input,
+    );
     return data;
   },
 

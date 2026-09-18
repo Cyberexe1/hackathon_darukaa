@@ -15,7 +15,14 @@ interface ModalProps {
  * Escape-to-close. Used for Create Project and other short forms. On
  * small screens the panel grows to fill most of the viewport.
  */
-export function Modal({ isOpen, onClose, title, children, footer, widthClassName = 'max-w-lg' }: ModalProps) {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+  footer,
+  widthClassName = 'max-w-lg',
+}: ModalProps) {
   useEffect(() => {
     if (!isOpen) return;
     function handleKeyDown(e: KeyboardEvent) {
@@ -60,7 +67,11 @@ export function Modal({ isOpen, onClose, title, children, footer, widthClassName
           </button>
         </div>
         <div className="px-space-lg py-space-lg">{children}</div>
-        {footer && <div className="flex items-center justify-end gap-space-sm px-space-lg py-space-md border-t border-outline-variant/30">{footer}</div>}
+        {footer && (
+          <div className="flex items-center justify-end gap-space-sm px-space-lg py-space-md border-t border-outline-variant/30">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

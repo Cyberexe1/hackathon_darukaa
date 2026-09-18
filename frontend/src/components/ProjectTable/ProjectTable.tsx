@@ -7,7 +7,11 @@ interface ProjectTableProps {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  return new Date(iso).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 /**
@@ -24,12 +28,24 @@ export function ProjectTable({ projects }: ProjectTableProps) {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-surface-container-low font-label-technical text-label-micro text-on-surface-variant uppercase">
-              <th scope="col" className="py-space-sm px-space-lg">Project</th>
-              <th scope="col" className="py-space-sm px-space-md">Type</th>
-              <th scope="col" className="py-space-sm px-space-md">Sites</th>
-              <th scope="col" className="py-space-sm px-space-md">Area</th>
-              <th scope="col" className="py-space-sm px-space-md">Status</th>
-              <th scope="col" className="py-space-sm px-space-lg">Last Updated</th>
+              <th scope="col" className="py-space-sm px-space-lg">
+                Project
+              </th>
+              <th scope="col" className="py-space-sm px-space-md">
+                Type
+              </th>
+              <th scope="col" className="py-space-sm px-space-md">
+                Sites
+              </th>
+              <th scope="col" className="py-space-sm px-space-md">
+                Area
+              </th>
+              <th scope="col" className="py-space-sm px-space-md">
+                Status
+              </th>
+              <th scope="col" className="py-space-sm px-space-lg">
+                Last Updated
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/20 font-body-sm text-body-sm">
@@ -40,13 +56,17 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                 className="hover:bg-surface-container-low/50 transition-colors cursor-pointer"
               >
                 <td className="py-space-md px-space-lg">
-                  <div className="font-headline-sm text-headline-sm text-primary">{project.name}</div>
+                  <div className="font-headline-sm text-headline-sm text-primary">
+                    {project.name}
+                  </div>
                   <div className="font-label-technical text-label-micro text-on-surface-variant">
                     {project.region}, {project.country}
                   </div>
                 </td>
                 <td className="py-space-md px-space-md text-on-surface">{project.project_type}</td>
-                <td className="py-space-md px-space-md text-primary font-medium">{project.site_count}</td>
+                <td className="py-space-md px-space-md text-primary font-medium">
+                  {project.site_count}
+                </td>
                 <td className="py-space-md px-space-md text-primary font-medium">
                   {project.total_area_hectares.toLocaleString()} ha
                 </td>
@@ -79,8 +99,15 @@ export function ProjectTable({ projects }: ProjectTableProps) {
               {project.project_type} &middot; {project.region}, {project.country}
             </p>
             <div className="flex items-center gap-space-md font-body-sm text-body-sm">
-              <span className="text-on-surface-variant">Sites: <span className="text-primary font-medium">{project.site_count}</span></span>
-              <span className="text-on-surface-variant">Area: <span className="text-primary font-medium">{project.total_area_hectares.toLocaleString()} ha</span></span>
+              <span className="text-on-surface-variant">
+                Sites: <span className="text-primary font-medium">{project.site_count}</span>
+              </span>
+              <span className="text-on-surface-variant">
+                Area:{' '}
+                <span className="text-primary font-medium">
+                  {project.total_area_hectares.toLocaleString()} ha
+                </span>
+              </span>
             </div>
           </button>
         ))}

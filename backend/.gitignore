@@ -2,4 +2,10 @@
 __pycache__/
 *.pyc
 .env
+.env.local
+.env.production
 .pytest_cache/
+.ruff_cache/
+*.egg-info/
+htmlcov/
+.coverage

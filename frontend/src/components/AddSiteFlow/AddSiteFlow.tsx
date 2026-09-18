@@ -74,8 +74,8 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
     setSummary(feature ? computeGeometrySummary(feature) : null);
   };
 
-  const goNext = () => setStep((s) => (Math.min(s + 1, 5) as Step));
-  const goBack = () => setStep((s) => (Math.max(s - 1, 1) as Step));
+  const goNext = () => setStep((s) => Math.min(s + 1, 5) as Step);
+  const goBack = () => setStep((s) => Math.max(s - 1, 1) as Step);
 
   const canProceed = (): boolean => {
     if (step === 1) return Boolean(projectId);
@@ -99,7 +99,9 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
       onCreated?.(created);
       handleClose();
     } catch (error) {
-      setSaveError(getApiErrorMessage(error, 'Unable to save the site boundary. Please try again.'));
+      setSaveError(
+        getApiErrorMessage(error, 'Unable to save the site boundary. Please try again.'),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -108,10 +110,15 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Add Site" widthClassName="max-w-2xl">
       {/* Step indicator */}
-      <div className="flex items-center gap-1 mb-space-lg" aria-label={`Step ${step} of 5: ${STEP_LABELS[step]}`}>
+      <div
+        className="flex items-center gap-1 mb-space-lg"
+        aria-label={`Step ${step} of 5: ${STEP_LABELS[step]}`}
+      >
         {([1, 2, 3, 4, 5] as Step[]).map((s) => (
           <div key={s} className="flex-1">
-            <div className={`h-1 rounded-full ${s <= step ? 'bg-surface-tint' : 'bg-surface-container-high'}`} />
+            <div
+              className={`h-1 rounded-full ${s <= step ? 'bg-surface-tint' : 'bg-surface-container-high'}`}
+            />
           </div>
         ))}
       </div>
@@ -121,7 +128,10 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
 
       {step === 1 && (
         <div className="flex flex-col gap-space-sm">
-          <label htmlFor="add-site-project" className="font-body-sm text-body-sm font-medium text-on-surface">
+          <label
+            htmlFor="add-site-project"
+            className="font-body-sm text-body-sm font-medium text-on-surface"
+          >
             Select the project this site belongs to
           </label>
           <select
@@ -148,7 +158,10 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
       {step === 2 && (
         <div className="flex flex-col gap-space-md">
           <div className="flex flex-col gap-1">
-            <label htmlFor="add-site-name" className="font-body-sm text-body-sm font-medium text-on-surface">
+            <label
+              htmlFor="add-site-name"
+              className="font-body-sm text-body-sm font-medium text-on-surface"
+            >
               Site Name
             </label>
             <input
@@ -160,7 +173,10 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
             />
           </div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="add-site-description" className="font-body-sm text-body-sm font-medium text-on-surface">
+            <label
+              htmlFor="add-site-description"
+              className="font-body-sm text-body-sm font-medium text-on-surface"
+            >
               Description (optional)
             </label>
             <textarea
@@ -197,22 +213,34 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
             <div className="p-space-md bg-surface-container-low rounded-xl">
-              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">Area</span>
-              <span className="font-headline-sm text-headline-sm text-primary">{summary.areaHectares.toLocaleString()} ha</span>
+              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">
+                Area
+              </span>
+              <span className="font-headline-sm text-headline-sm text-primary">
+                {summary.areaHectares.toLocaleString()} ha
+              </span>
             </div>
             <div className="p-space-md bg-surface-container-low rounded-xl">
-              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">Perimeter</span>
-              <span className="font-headline-sm text-headline-sm text-primary">{summary.perimeterKm.toLocaleString()} km</span>
+              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">
+                Perimeter
+              </span>
+              <span className="font-headline-sm text-headline-sm text-primary">
+                {summary.perimeterKm.toLocaleString()} km
+              </span>
             </div>
             <div className="p-space-md bg-surface-container-low rounded-xl">
-              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">Centroid</span>
+              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">
+                Centroid
+              </span>
               <span className="font-headline-sm text-headline-sm text-primary">
                 {summary.centroid.lat}, {summary.centroid.lon}
               </span>
             </div>
           </div>
           <div className="p-space-md bg-surface-container-low rounded-xl">
-            <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block mb-1">Summary</span>
+            <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block mb-1">
+              Summary
+            </span>
             <p className="font-body-sm text-body-sm text-on-surface">
               <span className="font-medium text-primary">{siteName}</span> will be added to{' '}
               <span className="font-medium text-primary">
@@ -228,17 +256,29 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
         <div className="flex flex-col items-center text-center gap-space-md py-space-md">
           {isSaving ? (
             <>
-              <span className="w-10 h-10 rounded-full border-3 border-surface-tint/30 border-t-surface-tint animate-spin" aria-hidden="true" />
-              <p className="font-body-md text-body-md text-on-surface-variant">Saving site boundary…</p>
+              <span
+                className="w-10 h-10 rounded-full border-3 border-surface-tint/30 border-t-surface-tint animate-spin"
+                aria-hidden="true"
+              />
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                Saving site boundary…
+              </p>
             </>
           ) : saveError ? (
             <>
-              <span className="material-symbols-outlined text-error text-[32px]" aria-hidden="true">error</span>
+              <span className="material-symbols-outlined text-error text-[32px]" aria-hidden="true">
+                error
+              </span>
               <p className="font-body-md text-body-md text-error">{saveError}</p>
             </>
           ) : (
             <>
-              <span className="material-symbols-outlined text-surface-tint text-[32px]" aria-hidden="true">check_circle</span>
+              <span
+                className="material-symbols-outlined text-surface-tint text-[32px]"
+                aria-hidden="true"
+              >
+                check_circle
+              </span>
               <p className="font-body-md text-body-md text-on-surface-variant">
                 Ready to save. Click Save Site to persist this boundary.
               </p>
@@ -264,7 +304,9 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
             className="inline-flex items-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_forward</span>
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+              arrow_forward
+            </span>
           </button>
         ) : (
           <button
@@ -274,10 +316,15 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
             className="inline-flex items-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isSaving ? (
-              <span className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin" aria-hidden="true" />
+              <span
+                className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin"
+                aria-hidden="true"
+              />
             ) : (
               <>
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">save</span>
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  save
+                </span>
                 Save Site
               </>
             )}

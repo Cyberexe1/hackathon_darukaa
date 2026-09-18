@@ -35,7 +35,11 @@ export const mockSiteService = {
   },
 
   async getSitesByProjectId(projectId: string): Promise<Site[]> {
-    return delay(getSitesByProjectId(projectId).length ? getSitesByProjectId(projectId) : sites.filter((s) => s.project_id === projectId));
+    return delay(
+      getSitesByProjectId(projectId).length
+        ? getSitesByProjectId(projectId)
+        : sites.filter((s) => s.project_id === projectId),
+    );
   },
 
   async createSite(input: CreateSiteInput): Promise<Site> {

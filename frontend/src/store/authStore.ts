@@ -89,3 +89,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 }));
+
+// apiClient's response interceptor dispatches this event the instant any
+// request gets a 401 (e.g. the token expired mid-session), after it has
+// already cleared the token from localStorage. Mirror that into the
+// in-memory store synchronously so ProtectedRoute redirects to /signin
+// immediately, rather than waiting for the next hydrate()/page load.
+if (typeof window !== 'undefined') {
+  window.addEventListener('darukaa:unauthorized', () => {
+    useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
+  });
+}

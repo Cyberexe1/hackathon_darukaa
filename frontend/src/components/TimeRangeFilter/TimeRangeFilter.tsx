@@ -23,7 +23,10 @@ interface TimeRangeFilterProps {
 export function TimeRangeFilter({ value, onChange, label = 'Time Range' }: TimeRangeFilterProps) {
   return (
     <div className="flex items-center gap-space-sm">
-      <label htmlFor="time-range-filter" className="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap">
+      <label
+        htmlFor="time-range-filter"
+        className="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap"
+      >
         {label}
       </label>
       <select

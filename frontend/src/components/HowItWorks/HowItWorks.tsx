@@ -42,7 +42,10 @@ const STEPS: WorkflowStep[] = [
  */
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="w-full bg-surface-container-low py-margin-wide scroll-mt-20">
+    <section
+      id="how-it-works"
+      className="w-full bg-surface-container-low py-margin-wide scroll-mt-20"
+    >
       <div className="w-full px-4 sm:px-gutter-lg max-w-[1720px] mx-auto">
         <Reveal className="max-w-3xl mb-space-xl">
           <span className="font-label-technical text-label-technical text-surface-tint uppercase tracking-widest font-semibold block mb-space-xs">
@@ -72,8 +75,12 @@ export function HowItWorks() {
                       </span>
                     </div>
                   </div>
-                  <h3 className="font-headline-md text-headline-md text-primary mb-space-xs">{step.title}</h3>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">{step.description}</p>
+                  <h3 className="font-headline-md text-headline-md text-primary mb-space-xs">
+                    {step.title}
+                  </h3>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">
+                    {step.description}
+                  </p>
                 </div>
                 <div className="mt-space-lg pt-space-sm font-label-technical text-label-micro text-surface-tint">
                   {step.tag}

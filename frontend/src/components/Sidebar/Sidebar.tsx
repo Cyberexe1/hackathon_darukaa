@@ -16,7 +16,13 @@ const NAV_ITEMS = [
   { to: '/settings', label: 'Settings', icon: 'settings' },
 ];
 
-function SidebarContent({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
+function SidebarContent({
+  collapsed,
+  onNavigate,
+}: {
+  collapsed: boolean;
+  onNavigate?: () => void;
+}) {
   return (
     <nav className="flex flex-col gap-1 px-space-sm py-space-md flex-1" aria-label="Dashboard">
       {NAV_ITEMS.map((item) => (

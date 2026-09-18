@@ -50,7 +50,8 @@ export function PerformanceSummaryCard({ performance, summary }: PerformanceSumm
         <h3 className="font-headline-sm text-headline-sm text-primary">Performance Overview</h3>
         {summary.first_recorded_at && summary.last_recorded_at && (
           <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
-            {new Date(summary.first_recorded_at).getFullYear()} &mdash; {new Date(summary.last_recorded_at).getFullYear()}
+            {new Date(summary.first_recorded_at).getFullYear()} &mdash;{' '}
+            {new Date(summary.last_recorded_at).getFullYear()}
           </span>
         )}
       </div>

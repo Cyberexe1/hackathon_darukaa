@@ -49,7 +49,9 @@ export const useSiteStore = create<SiteState>((set, get) => ({
   fetchSiteById: async (id) => {
     const site = await siteService.getSiteById(id);
     set((state) => ({
-      sites: state.sites.some((s) => s.id === id) ? state.sites.map((s) => (s.id === id ? site : s)) : [...state.sites, site],
+      sites: state.sites.some((s) => s.id === id)
+        ? state.sites.map((s) => (s.id === id ? site : s))
+        : [...state.sites, site],
     }));
     return site;
   },

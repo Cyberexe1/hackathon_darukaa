@@ -43,8 +43,8 @@ export function MapSection() {
             </h2>
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-space-lg">
               No approximations or square bounding boxes. Draw intricate parcel perimeters along
-              rivers, ridges, and property lines. Darukaa calculates land surface area
-              automatically across geodesic ellipsoids with zero planar distortion.
+              rivers, ridges, and property lines. Darukaa calculates land surface area automatically
+              across geodesic ellipsoids with zero planar distortion.
             </p>
 
             <div className="space-y-space-sm mb-space-xl">
@@ -54,12 +54,19 @@ export function MapSection() {
                   className="flex items-center justify-between p-space-md bg-surface-container-lowest rounded-xl shadow-sm cursor-pointer hover:bg-surface-bright transition-colors"
                 >
                   <div className="flex items-center gap-space-sm">
-                    <span className={`material-symbols-outlined ${layer.iconClass}`} aria-hidden="true">
+                    <span
+                      className={`material-symbols-outlined ${layer.iconClass}`}
+                      aria-hidden="true"
+                    >
                       {layer.icon}
                     </span>
                     <div>
-                      <div className="font-headline-sm text-headline-sm text-primary">{layer.title}</div>
-                      <div className="font-body-sm text-body-sm text-on-surface-variant">{layer.description}</div>
+                      <div className="font-headline-sm text-headline-sm text-primary">
+                        {layer.title}
+                      </div>
+                      <div className="font-body-sm text-body-sm text-on-surface-variant">
+                        {layer.description}
+                      </div>
                     </div>
                   </div>
                   <input
@@ -73,7 +80,10 @@ export function MapSection() {
             </div>
 
             <div className="flex items-center gap-space-sm font-label-technical text-label-technical text-on-surface-variant">
-              <span className="material-symbols-outlined text-[18px] text-surface-tint" aria-hidden="true">
+              <span
+                className="material-symbols-outlined text-[18px] text-surface-tint"
+                aria-hidden="true"
+              >
                 check_circle
               </span>
               <span>Compliant with Verra VM0042 &amp; Gold Standard Land Methodologies</span>
@@ -84,8 +94,12 @@ export function MapSection() {
             <div className="w-full bg-surface-container-lowest rounded-2xl p-space-lg shadow-lg relative overflow-hidden">
               <div className="flex items-center justify-between mb-space-md flex-wrap gap-space-sm">
                 <div className="flex items-center gap-space-sm">
-                  <span className="material-symbols-outlined text-primary" aria-hidden="true">gesture</span>
-                  <span className="font-headline-sm text-headline-sm text-primary">Boundary Editor // Site 04-A</span>
+                  <span className="material-symbols-outlined text-primary" aria-hidden="true">
+                    gesture
+                  </span>
+                  <span className="font-headline-sm text-headline-sm text-primary">
+                    Boundary Editor // Site 04-A
+                  </span>
                 </div>
                 <span className="font-label-technical text-label-micro text-surface-tint bg-primary-fixed px-space-xs py-1 rounded">
                   GEODESIC ELLIPSOID: WGS 84
@@ -126,9 +140,15 @@ export function MapSection() {
                 </svg>
 
                 <div className="hidden sm:block absolute top-12 left-1/3 bg-surface-container-lowest/95 backdrop-blur-md p-space-sm rounded shadow-lg">
-                  <div className="font-label-technical text-label-micro text-primary font-bold">VERTEX 2 [LOCKED]</div>
-                  <div className="font-label-technical text-label-micro text-on-surface-variant">14.542&deg; N, 75.319&deg; E</div>
-                  <div className="font-label-technical text-label-micro text-surface-tint">Elevation: 684m ASL</div>
+                  <div className="font-label-technical text-label-micro text-primary font-bold">
+                    VERTEX 2 [LOCKED]
+                  </div>
+                  <div className="font-label-technical text-label-micro text-on-surface-variant">
+                    14.542&deg; N, 75.319&deg; E
+                  </div>
+                  <div className="font-label-technical text-label-micro text-surface-tint">
+                    Elevation: 684m ASL
+                  </div>
                 </div>
 
                 <div className="absolute bottom-4 right-4 bg-primary-container text-on-primary px-space-md py-space-xs rounded-full font-label-technical text-label-micro shadow-md">

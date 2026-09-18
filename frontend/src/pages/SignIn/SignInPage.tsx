@@ -69,7 +69,10 @@ export function SignInPage() {
       <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-lg p-space-xl">
         <Link to="/" className="flex items-center gap-space-sm justify-center mb-space-lg">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-on-primary text-[18px]" aria-hidden="true">
+            <span
+              className="material-symbols-outlined text-on-primary text-[18px]"
+              aria-hidden="true"
+            >
               public
             </span>
           </div>

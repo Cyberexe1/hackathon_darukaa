@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import type { Project } from '../types/dashboard';
-import { projectService, type CreateProjectInput, type UpdateProjectInput } from '../services/projectService';
+import {
+  projectService,
+  type CreateProjectInput,
+  type UpdateProjectInput,
+} from '../services/projectService';
 import { getApiErrorMessage } from '../services/apiError';
 
 interface ProjectState {

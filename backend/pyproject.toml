@@ -29,6 +29,11 @@ ignore = [
 # at ORM-mapper-configuration time, not at module-import time — Ruff
 # can't see that and flags them as undefined names.
 "app/models/*.py" = ["F821"]
+# alembic/env.py deliberately orders `sys.path.insert(...)` before the
+# `app.*` imports it enables, and orders model imports by FK dependency
+# (User -> Project -> Site -> SiteMetric) for readability, not
+# alphabetically — excluded from import-sort/import-order enforcement.
+"alembic/env.py" = ["I001", "E402"]
 
 [tool.ruff.format]
 quote-style = "double"

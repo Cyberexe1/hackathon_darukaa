@@ -28,7 +28,9 @@ interface MetricFormProps {
 export function MetricForm({ initial, onSubmit, onCancel }: MetricFormProps) {
   const [recordedAt, setRecordedAt] = useState(initial?.recorded_at ?? '');
   const [carbon, setCarbon] = useState(initial ? String(initial.carbon_tco2e) : '');
-  const [biodiversity, setBiodiversity] = useState(initial ? String(initial.biodiversity_score) : '');
+  const [biodiversity, setBiodiversity] = useState(
+    initial ? String(initial.biodiversity_score) : '',
+  );
   const [vegetation, setVegetation] = useState(initial ? String(initial.vegetation_index) : '');
   const [treeCover, setTreeCover] = useState(initial ? String(initial.tree_cover_percentage) : '');
 
@@ -79,7 +81,9 @@ export function MetricForm({ initial, onSubmit, onCancel }: MetricFormProps) {
         tree_cover_percentage: Number(treeCover),
       });
     } catch (error) {
-      setSubmitError(getApiErrorMessage(error, 'Unable to save this measurement. Please try again.'));
+      setSubmitError(
+        getApiErrorMessage(error, 'Unable to save this measurement. Please try again.'),
+      );
       setIsSubmitting(false);
     }
   };
@@ -158,10 +162,15 @@ export function MetricForm({ initial, onSubmit, onCancel }: MetricFormProps) {
           className="inline-flex items-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
-            <span className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin" aria-hidden="true" />
+            <span
+              className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin"
+              aria-hidden="true"
+            />
           ) : (
             <>
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">save</span>
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                save
+              </span>
               {initial ? 'Save Changes' : 'Add Measurement'}
             </>
           )}

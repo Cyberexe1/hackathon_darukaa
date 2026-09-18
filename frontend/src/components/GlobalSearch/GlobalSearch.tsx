@@ -84,7 +84,10 @@ export function GlobalSearch({ autoFocus, onNavigate }: GlobalSearchProps) {
   return (
     <div className="relative w-full max-w-sm" ref={containerRef}>
       <div className="flex items-center gap-space-xs bg-surface-container-low rounded-full px-space-md py-space-xs">
-        <span className="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">
+        <span
+          className="material-symbols-outlined text-[18px] text-on-surface-variant"
+          aria-hidden="true"
+        >
           search
         </span>
         <input
@@ -121,11 +124,16 @@ export function GlobalSearch({ autoFocus, onNavigate }: GlobalSearchProps) {
                     className="w-full text-left px-space-md py-space-sm hover:bg-surface-container-low transition-colors flex items-center gap-space-sm"
                     role="option"
                   >
-                    <span className="material-symbols-outlined text-[18px] text-surface-tint shrink-0" aria-hidden="true">
+                    <span
+                      className="material-symbols-outlined text-[18px] text-surface-tint shrink-0"
+                      aria-hidden="true"
+                    >
                       {result.type === 'project' ? 'forest' : 'pin_drop'}
                     </span>
                     <div className="min-w-0">
-                      <p className="font-body-sm text-body-sm text-on-surface truncate">{result.label}</p>
+                      <p className="font-body-sm text-body-sm text-on-surface truncate">
+                        {result.label}
+                      </p>
                       <p className="font-label-technical text-label-micro text-on-surface-variant truncate">
                         {result.sublabel}
                       </p>

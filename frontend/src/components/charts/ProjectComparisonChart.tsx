@@ -20,7 +20,12 @@ interface ProjectComparisonChartProps {
  * at a time (carbon OR biodiversity, etc — never overlapping several
  * metrics at once, to keep the comparison legible).
  */
-export function ProjectComparisonChart({ data, metricLabel, unit = '', height = 300 }: ProjectComparisonChartProps) {
+export function ProjectComparisonChart({
+  data,
+  metricLabel,
+  unit = '',
+  height = 300,
+}: ProjectComparisonChartProps) {
   const options: Highcharts.Options = Highcharts.merge(baseChartOptions(height), {
     chart: { type: 'bar' },
     xAxis: {

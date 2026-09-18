@@ -77,7 +77,10 @@ export function SignUpPage() {
       <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-lg p-space-xl">
         <Link to="/" className="flex items-center gap-space-sm justify-center mb-space-lg">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-on-primary text-[18px]" aria-hidden="true">
+            <span
+              className="material-symbols-outlined text-on-primary text-[18px]"
+              aria-hidden="true"
+            >
               public
             </span>
           </div>
@@ -86,7 +89,9 @@ export function SignUpPage() {
           </span>
         </Link>
 
-        <h1 className="font-headline-lg text-headline-lg text-primary mb-1 text-center">Create your account</h1>
+        <h1 className="font-headline-lg text-headline-lg text-primary mb-1 text-center">
+          Create your account
+        </h1>
         <p className="font-body-md text-body-md text-on-surface-variant mb-space-xl text-center">
           Start mapping projects and monitoring biometrics in minutes.
         </p>

@@ -28,8 +28,8 @@ export function CTA() {
           Your understanding should too.
         </h2>
         <p className="font-body-lg text-body-lg text-outline-variant max-w-2xl mx-auto mb-space-xl">
-          Bring your environmental projects, discrete sites, and longitudinal impact telemetry
-          into one intelligent geospatial platform.
+          Bring your environmental projects, discrete sites, and longitudinal impact telemetry into
+          one intelligent geospatial platform.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-space-md">
           <button
@@ -54,14 +54,22 @@ export function CTA() {
         </div>
         <div className="mt-space-xl pt-space-md flex flex-wrap items-center justify-center gap-space-lg text-outline-variant font-label-technical text-label-micro">
           <span className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">verified</span> ISO 14064 READY
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+              verified
+            </span>{' '}
+            ISO 14064 READY
           </span>
           <span className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">public</span> GLOBAL COVERAGE
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+              public
+            </span>{' '}
+            GLOBAL COVERAGE
           </span>
           <span className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">security</span> SOC 2 TYPE II
-            CERTIFIED
+            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+              security
+            </span>{' '}
+            SOC 2 TYPE II CERTIFIED
           </span>
         </div>
       </Reveal>

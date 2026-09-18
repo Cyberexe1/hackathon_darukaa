@@ -18,7 +18,10 @@ export function Footer() {
           <div className="flex flex-col gap-space-xs">
             <div className="flex items-center gap-space-sm">
               <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-on-primary text-[14px]" aria-hidden="true">
+                <span
+                  className="material-symbols-outlined text-on-primary text-[14px]"
+                  aria-hidden="true"
+                >
                   public
                 </span>
               </div>
@@ -30,7 +33,10 @@ export function Footer() {
               Geospatial intelligence for environmental impact
             </p>
           </div>
-          <nav className="flex flex-wrap items-center gap-x-space-lg gap-y-space-xs" aria-label="Footer">
+          <nav
+            className="flex flex-wrap items-center gap-x-space-lg gap-y-space-xs"
+            aria-label="Footer"
+          >
             {FOOTER_LINKS.map((link) => (
               <a
                 key={link.label}

@@ -21,7 +21,9 @@ export function ErrorState({
         </span>
       </div>
       <h3 className="font-headline-sm text-headline-sm text-primary mb-1">{title}</h3>
-      <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mb-space-md">{description}</p>
+      <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm mb-space-md">
+        {description}
+      </p>
       {onRetry && (
         <button
           type="button"

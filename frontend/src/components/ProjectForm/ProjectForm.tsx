@@ -104,7 +104,10 @@ export function ProjectForm({ onSuccess, onCancel }: ProjectFormProps) {
       />
 
       <div className="flex flex-col gap-1 text-left">
-        <label htmlFor="project-description" className="font-body-sm text-body-sm font-medium text-on-surface">
+        <label
+          htmlFor="project-description"
+          className="font-body-sm text-body-sm font-medium text-on-surface"
+        >
           Description
         </label>
         <textarea
@@ -126,7 +129,10 @@ export function ProjectForm({ onSuccess, onCancel }: ProjectFormProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
         <div className="flex flex-col gap-1 text-left">
-          <label htmlFor="project-type" className="font-body-sm text-body-sm font-medium text-on-surface">
+          <label
+            htmlFor="project-type"
+            className="font-body-sm text-body-sm font-medium text-on-surface"
+          >
             Project Type
           </label>
           <select
@@ -144,7 +150,10 @@ export function ProjectForm({ onSuccess, onCancel }: ProjectFormProps) {
         </div>
 
         <div className="flex flex-col gap-1 text-left">
-          <label htmlFor="project-status" className="font-body-sm text-body-sm font-medium text-on-surface">
+          <label
+            htmlFor="project-status"
+            className="font-body-sm text-body-sm font-medium text-on-surface"
+          >
             Status
           </label>
           <select
@@ -220,10 +229,15 @@ export function ProjectForm({ onSuccess, onCancel }: ProjectFormProps) {
           className="inline-flex items-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
-            <span className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin" aria-hidden="true" />
+            <span
+              className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin"
+              aria-hidden="true"
+            />
           ) : (
             <>
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                add
+              </span>
               Create Project
             </>
           )}

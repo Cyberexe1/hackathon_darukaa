@@ -87,10 +87,12 @@ postgresql+psycopg://<user>:<password>@<neon-host>/<dbname>?sslmode=require
 | Variable | Description |
 |---|---|
 | `DATABASE_URL` | Neon Postgres connection string (`postgresql+psycopg://...?sslmode=require`) |
-| `JWT_SECRET` | Random secret used to sign JWTs — generate with `python -c "import secrets; print(secrets.token_urlsafe(64))"` |
+| `JWT_SECRET_KEY` | Random secret used to sign JWTs — generate with `python -c "import secrets; print(secrets.token_urlsafe(64))"` (legacy alias `JWT_SECRET` also accepted) |
 | `JWT_ALGORITHM` | Defaults to `HS256` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Defaults to `1440` (24h) |
-| `CORS_ORIGINS` | Comma-separated list of allowed frontend origins |
+| `CORS_ORIGINS` | Comma-separated list of allowed frontend origins. Must not contain `*` when `DEBUG=False` — enforced at startup |
+| `DEBUG` | Defaults to `True`. Set `False` in production |
+| `ENVIRONMENT` | Defaults to `development`. Informational label surfaced in `/health` and logs |
 
 None of these are hardcoded anywhere in source — they're read from the
 environment (via `.env` locally, real environment variables in
@@ -155,9 +157,33 @@ cross-user access denial (403) plus not-found handling (404).
 
 ## Security notes
 - No secrets or connection strings are hardcoded — `DATABASE_URL` and
-  `JWT_SECRET` are read from environment variables (via `.env` in dev).
+  `JWT_SECRET_KEY` are read from environment variables (via `.env` in dev).
 - `.env` is git-ignored. Never commit real credentials.
 - CORS is restricted to the origins listed in `CORS_ORIGINS` (comma
-  separated). Update this to your deployed frontend URL in production.
+  separated). A wildcard (`*`) is rejected at startup whenever
+  `DEBUG=False` — production must list its exact frontend origin(s).
 - Ownership is always derived from the JWT — no endpoint trusts a
   client-supplied user/owner id.
+- `/auth/signup` and `/auth/signin` are rate-limited (10 requests/minute
+  per IP) to slow down brute-force attempts.
+- A catch-all exception handler in `app/main.py` ensures no unhandled
+  error ever returns a raw stack trace, SQL error, or file path to the
+  client — everything is logged server-side and a generic message is
+  returned instead.
+- `GET /health` is a fast liveness check; `GET /health/db` verifies the
+  database connection without revealing connection details.
+
+## Linting
+
+```powershell
+.\.venv\Scripts\pip install -r requirements-dev.txt
+.\.venv\Scripts\ruff check .
+.\.venv\Scripts\ruff format --check .
+```
+
+## Render deployment
+
+See `render.yaml` at the repo root of this folder. Start command:
+`uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Set `DATABASE_URL`
+and `CORS_ORIGINS` in Render's environment variable UI — both are left
+as `sync: false` in `render.yaml` so they're never committed.

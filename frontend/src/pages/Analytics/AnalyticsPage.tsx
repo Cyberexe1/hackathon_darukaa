@@ -4,10 +4,17 @@ import { DashboardLayout } from '../../components/DashboardLayout/DashboardLayou
 import { AnalyticsCard } from '../../components/AnalyticsCard/AnalyticsCard';
 import { CarbonChart } from '../../components/charts/CarbonChart';
 import { PerformanceChart } from '../../components/charts/PerformanceChart';
-import { ProjectComparisonChart, type ProjectComparisonDatum } from '../../components/charts/ProjectComparisonChart';
+import {
+  ProjectComparisonChart,
+  type ProjectComparisonDatum,
+} from '../../components/charts/ProjectComparisonChart';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
-import { KpiCardSkeleton, ChartSkeleton, TableSkeleton } from '../../components/LoadingSkeleton/LoadingSkeleton';
+import {
+  KpiCardSkeleton,
+  ChartSkeleton,
+  TableSkeleton,
+} from '../../components/LoadingSkeleton/LoadingSkeleton';
 import { StatusBadge } from '../../components/StatusBadge/StatusBadge';
 import { TimeRangeFilter } from '../../components/TimeRangeFilter/TimeRangeFilter';
 import { filterByTimeRange } from '../../utils/timeRange';
@@ -18,7 +25,12 @@ import { useMapStore, type AnalyticsMapMode } from '../../store/mapStore';
 import { analyticsService } from '../../services/analyticsService';
 import { getApiErrorMessage } from '../../services/apiError';
 import { aggregateMetricsByYear } from '../../utils/aggregateMetrics';
-import type { AnalyticsTimeRange, Project, Site, SiteAnalyticsResponse } from '../../types/dashboard';
+import type {
+  AnalyticsTimeRange,
+  Project,
+  Site,
+  SiteAnalyticsResponse,
+} from '../../types/dashboard';
 
 type ComparisonMetric = 'carbon' | 'biodiversity';
 
@@ -66,8 +78,14 @@ export function AnalyticsPage() {
     fetchSites();
   }, [fetchProjects, fetchSites]);
 
-  const regions = useMemo(() => Array.from(new Set(projects.map((p) => p.region))).sort(), [projects]);
-  const projectTypes = useMemo(() => Array.from(new Set(projects.map((p) => p.project_type))).sort(), [projects]);
+  const regions = useMemo(
+    () => Array.from(new Set(projects.map((p) => p.region))).sort(),
+    [projects],
+  );
+  const projectTypes = useMemo(
+    () => Array.from(new Set(projects.map((p) => p.project_type))).sort(),
+    [projects],
+  );
 
   const filteredProjects = useMemo(
     () =>
@@ -82,14 +100,22 @@ export function AnalyticsPage() {
 
   const filteredSites = useMemo(() => {
     const projectIds = new Set(filteredProjects.map((p) => p.id));
-    return sites.filter((s) => projectIds.has(s.project_id) && (siteFilter === 'all' || s.id === siteFilter));
+    return sites.filter(
+      (s) => projectIds.has(s.project_id) && (siteFilter === 'all' || s.id === siteFilter),
+    );
   }, [sites, filteredProjects, siteFilter]);
 
   // Stable, primitive keys derived from the filtered id sets — used as
   // effect/callback dependencies instead of the array references
   // themselves (which change identity on every render).
-  const filteredSiteIdsKey = useMemo(() => filteredSites.map((s) => s.id).join(','), [filteredSites]);
-  const filteredProjectIdsKey = useMemo(() => filteredProjects.map((p) => p.id).join(','), [filteredProjects]);
+  const filteredSiteIdsKey = useMemo(
+    () => filteredSites.map((s) => s.id).join(','),
+    [filteredSites],
+  );
+  const filteredProjectIdsKey = useMemo(
+    () => filteredProjects.map((p) => p.id).join(','),
+    [filteredProjects],
+  );
 
   // Load per-site analytics for every filtered site. Small dataset
   // (portfolio-scale, not satellite-scale), so per-site fetches in
@@ -105,7 +131,10 @@ export function AnalyticsPage() {
     setError(null);
     try {
       const results = await Promise.all(
-        filteredSites.map(async (site) => ({ site, analytics: await analyticsService.getSiteAnalytics(site.id) })),
+        filteredSites.map(async (site) => ({
+          site,
+          analytics: await analyticsService.getSiteAnalytics(site.id),
+        })),
       );
       setEntries(results);
     } catch (err) {
@@ -133,7 +162,9 @@ export function AnalyticsPage() {
         filteredProjects.map(async (project) => {
           const data = await analyticsService.getProjectAnalytics(project.id);
           const value =
-            comparisonMetric === 'carbon' ? data.summary.carbon_total : data.summary.avg_biodiversity_score;
+            comparisonMetric === 'carbon'
+              ? data.summary.carbon_total
+              : data.summary.avg_biodiversity_score;
           return { projectName: project.name, value: value ?? 0 };
         }),
       );
@@ -153,11 +184,16 @@ export function AnalyticsPage() {
 
   const allHistoricalFiltered = useMemo(
     () =>
-      entries.map((e) => filterByTimeRange(e.analytics.historical, timeRange, (m) => m.recorded_at)),
+      entries.map((e) =>
+        filterByTimeRange(e.analytics.historical, timeRange, (m) => m.recorded_at),
+      ),
     [entries, timeRange],
   );
 
-  const yearlyAggregates = useMemo(() => aggregateMetricsByYear(allHistoricalFiltered), [allHistoricalFiltered]);
+  const yearlyAggregates = useMemo(
+    () => aggregateMetricsByYear(allHistoricalFiltered),
+    [allHistoricalFiltered],
+  );
   const carbonChartData = useMemo(
     () => yearlyAggregates.map((p) => ({ label: String(p.year), value: p.carbon_tco2e })),
     [yearlyAggregates],
@@ -170,14 +206,20 @@ export function AnalyticsPage() {
     : null;
   const avgBiodiversity = entriesWithData.length
     ? Math.round(
-        (entriesWithData.reduce((sum, e) => sum + (e.analytics.summary.biodiversity_current ?? 0), 0) /
+        (entriesWithData.reduce(
+          (sum, e) => sum + (e.analytics.summary.biodiversity_current ?? 0),
+          0,
+        ) /
           entriesWithData.length) *
           10,
       ) / 10
     : null;
   const avgVegetation = entriesWithData.length
     ? Math.round(
-        (entriesWithData.reduce((sum, e) => sum + (e.analytics.summary.vegetation_current ?? 0), 0) /
+        (entriesWithData.reduce(
+          (sum, e) => sum + (e.analytics.summary.vegetation_current ?? 0),
+          0,
+        ) /
           entriesWithData.length) *
           100,
       ) / 100
@@ -208,7 +250,9 @@ export function AnalyticsPage() {
     <DashboardLayout pageTitle="Analytics">
       <div className="p-4 md:p-space-lg max-w-[1600px] mx-auto flex flex-col gap-space-lg">
         <div>
-          <h2 className="font-headline-lg text-headline-lg text-primary mb-1">Environmental Analytics</h2>
+          <h2 className="font-headline-lg text-headline-lg text-primary mb-1">
+            Environmental Analytics
+          </h2>
           <p className="font-body-md text-body-md text-on-surface-variant">
             Understand environmental performance across your projects and sites.
           </p>
@@ -223,25 +267,37 @@ export function AnalyticsPage() {
               setProjectFilter(v);
               setSiteFilter('all');
             }}
-            options={[{ value: 'all', label: 'All Projects' }, ...projects.map((p: Project) => ({ value: p.id, label: p.name }))]}
+            options={[
+              { value: 'all', label: 'All Projects' },
+              ...projects.map((p: Project) => ({ value: p.id, label: p.name })),
+            ]}
           />
           <FilterSelect
             label="Site"
             value={siteFilter}
             onChange={setSiteFilter}
-            options={[{ value: 'all', label: 'All Sites' }, ...filteredSites.map((s) => ({ value: s.id, label: s.name }))]}
+            options={[
+              { value: 'all', label: 'All Sites' },
+              ...filteredSites.map((s) => ({ value: s.id, label: s.name })),
+            ]}
           />
           <FilterSelect
             label="Region"
             value={regionFilter}
             onChange={setRegionFilter}
-            options={[{ value: 'all', label: 'All Regions' }, ...regions.map((r) => ({ value: r, label: r }))]}
+            options={[
+              { value: 'all', label: 'All Regions' },
+              ...regions.map((r) => ({ value: r, label: r })),
+            ]}
           />
           <FilterSelect
             label="Project Type"
             value={typeFilter}
             onChange={setTypeFilter}
-            options={[{ value: 'all', label: 'All Types' }, ...projectTypes.map((t) => ({ value: t, label: t }))]}
+            options={[
+              { value: 'all', label: 'All Types' },
+              ...projectTypes.map((t) => ({ value: t, label: t })),
+            ]}
           />
           <TimeRangeFilter value={timeRange} onChange={setTimeRange} />
         </div>
@@ -249,17 +305,35 @@ export function AnalyticsPage() {
         {/* Global KPIs */}
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-gutter">
-            {Array.from({ length: 6 }).map((_, i) => <KpiCardSkeleton key={i} />)}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <KpiCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-gutter">
-            <AnalyticsCard icon="forest" label="Total Projects" value={String(filteredProjects.length)} />
-            <AnalyticsCard icon="pin_drop" label="Total Sites" value={String(filteredSites.length)} />
-            <AnalyticsCard icon="satellite_alt" label="Total Area" value={`${totalArea.toLocaleString()} ha`} />
+            <AnalyticsCard
+              icon="forest"
+              label="Total Projects"
+              value={String(filteredProjects.length)}
+            />
+            <AnalyticsCard
+              icon="pin_drop"
+              label="Total Sites"
+              value={String(filteredSites.length)}
+            />
+            <AnalyticsCard
+              icon="satellite_alt"
+              label="Total Area"
+              value={`${totalArea.toLocaleString()} ha`}
+            />
             <AnalyticsCard
               icon="co2"
               label="Carbon Impact"
-              value={totalCarbon != null ? `${(totalCarbon / 1000).toFixed(1)}K tCO\u2082e` : 'No data available'}
+              value={
+                totalCarbon != null
+                  ? `${(totalCarbon / 1000).toFixed(1)}K tCO\u2082e`
+                  : 'No data available'
+              }
             />
             <AnalyticsCard
               icon="eco"
@@ -275,7 +349,11 @@ export function AnalyticsPage() {
         )}
 
         {!isLoading && error && (
-          <ErrorState title="Unable to load environmental analytics." description={error} onRetry={loadEntries} />
+          <ErrorState
+            title="Unable to load environmental analytics."
+            description={error}
+            onRetry={loadEntries}
+          />
         )}
 
         {!isLoading && !error && filteredSites.length === 0 && (
@@ -318,7 +396,9 @@ export function AnalyticsPage() {
                 ) : comparisonData.length > 0 ? (
                   <ProjectComparisonChart
                     data={comparisonData}
-                    metricLabel={comparisonMetric === 'carbon' ? 'Carbon (tCO\u2082e)' : 'Biodiversity Score'}
+                    metricLabel={
+                      comparisonMetric === 'carbon' ? 'Carbon (tCO\u2082e)' : 'Biodiversity Score'
+                    }
                     unit={comparisonMetric === 'carbon' ? 'tCO\u2082e' : '/ 100'}
                   />
                 ) : (
@@ -340,7 +420,10 @@ export function AnalyticsPage() {
               <div className="flex items-center justify-between mb-space-sm px-space-sm flex-wrap gap-space-sm">
                 <h3 className="font-headline-sm text-headline-sm text-primary">Analytics Map</h3>
                 <div className="flex items-center gap-space-sm">
-                  <label htmlFor="analytics-map-mode" className="font-body-sm text-body-sm text-on-surface-variant">
+                  <label
+                    htmlFor="analytics-map-mode"
+                    className="font-body-sm text-body-sm text-on-surface-variant"
+                  >
                     Visualize
                   </label>
                   <select
@@ -370,7 +453,9 @@ export function AnalyticsPage() {
 
             {/* Site performance table */}
             <div>
-              <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm">Site Performance</h3>
+              <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm">
+                Site Performance
+              </h3>
               {isLoading ? (
                 <TableSkeleton />
               ) : (
@@ -379,13 +464,27 @@ export function AnalyticsPage() {
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-surface-container-low font-label-technical text-label-micro text-on-surface-variant uppercase">
-                          <th scope="col" className="py-space-sm px-space-lg">Site</th>
-                          <th scope="col" className="py-space-sm px-space-md">Project</th>
-                          <th scope="col" className="py-space-sm px-space-md">Area</th>
-                          <th scope="col" className="py-space-sm px-space-md">Carbon</th>
-                          <th scope="col" className="py-space-sm px-space-md">Biodiversity</th>
-                          <th scope="col" className="py-space-sm px-space-md">Vegetation</th>
-                          <th scope="col" className="py-space-sm px-space-md">Status</th>
+                          <th scope="col" className="py-space-sm px-space-lg">
+                            Site
+                          </th>
+                          <th scope="col" className="py-space-sm px-space-md">
+                            Project
+                          </th>
+                          <th scope="col" className="py-space-sm px-space-md">
+                            Area
+                          </th>
+                          <th scope="col" className="py-space-sm px-space-md">
+                            Carbon
+                          </th>
+                          <th scope="col" className="py-space-sm px-space-md">
+                            Biodiversity
+                          </th>
+                          <th scope="col" className="py-space-sm px-space-md">
+                            Vegetation
+                          </th>
+                          <th scope="col" className="py-space-sm px-space-md">
+                            Status
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-outline-variant/20 font-body-sm text-body-sm">
@@ -397,17 +496,29 @@ export function AnalyticsPage() {
                               onClick={() => navigate(`/sites/${site.id}`)}
                               className="hover:bg-surface-container-low/50 transition-colors cursor-pointer"
                             >
-                              <td className="py-space-sm px-space-lg font-headline-sm text-headline-sm text-primary">{site.name}</td>
-                              <td className="py-space-sm px-space-md text-on-surface">{project?.name ?? '—'}</td>
-                              <td className="py-space-sm px-space-md text-primary font-medium">{site.area_hectares.toLocaleString()} ha</td>
-                              <td className="py-space-sm px-space-md text-on-surface">
-                                {analytics.summary.carbon_total != null ? `${analytics.summary.carbon_total.toLocaleString()} tCO\u2082e` : '—'}
+                              <td className="py-space-sm px-space-lg font-headline-sm text-headline-sm text-primary">
+                                {site.name}
                               </td>
                               <td className="py-space-sm px-space-md text-on-surface">
-                                {analytics.summary.biodiversity_current != null ? `${analytics.summary.biodiversity_current} / 100` : '—'}
+                                {project?.name ?? '—'}
+                              </td>
+                              <td className="py-space-sm px-space-md text-primary font-medium">
+                                {site.area_hectares.toLocaleString()} ha
                               </td>
                               <td className="py-space-sm px-space-md text-on-surface">
-                                {analytics.summary.vegetation_current != null ? analytics.summary.vegetation_current.toFixed(2) : '—'}
+                                {analytics.summary.carbon_total != null
+                                  ? `${analytics.summary.carbon_total.toLocaleString()} tCO\u2082e`
+                                  : '—'}
+                              </td>
+                              <td className="py-space-sm px-space-md text-on-surface">
+                                {analytics.summary.biodiversity_current != null
+                                  ? `${analytics.summary.biodiversity_current} / 100`
+                                  : '—'}
+                              </td>
+                              <td className="py-space-sm px-space-md text-on-surface">
+                                {analytics.summary.vegetation_current != null
+                                  ? analytics.summary.vegetation_current.toFixed(2)
+                                  : '—'}
                               </td>
                               <td className="py-space-sm px-space-md">
                                 <StatusBadge status={site.status} />
@@ -438,7 +549,9 @@ interface FilterSelectProps {
 function FilterSelect({ label, value, onChange, options }: FilterSelectProps) {
   return (
     <div className="flex items-center gap-space-sm">
-      <label className="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap">{label}</label>
+      <label className="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap">
+        {label}
+      </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}

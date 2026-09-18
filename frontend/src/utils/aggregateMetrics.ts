@@ -13,12 +13,31 @@ import type { SiteMetric, YearAggregatePoint } from '../types/dashboard';
  * combining them for a filter combination the API doesn't expose directly.
  */
 export function aggregateMetricsByYear(allHistorical: SiteMetric[][]): YearAggregatePoint[] {
-  const byYear = new Map<number, { carbon: number; bioSum: number; bioCount: number; vegSum: number; vegCount: number; treeSum: number; treeCount: number }>();
+  const byYear = new Map<
+    number,
+    {
+      carbon: number;
+      bioSum: number;
+      bioCount: number;
+      vegSum: number;
+      vegCount: number;
+      treeSum: number;
+      treeCount: number;
+    }
+  >();
 
   for (const series of allHistorical) {
     for (const metric of series) {
       const year = new Date(metric.recorded_at).getFullYear();
-      const bucket = byYear.get(year) ?? { carbon: 0, bioSum: 0, bioCount: 0, vegSum: 0, vegCount: 0, treeSum: 0, treeCount: 0 };
+      const bucket = byYear.get(year) ?? {
+        carbon: 0,
+        bioSum: 0,
+        bioCount: 0,
+        vegSum: 0,
+        vegCount: 0,
+        treeSum: 0,
+        treeCount: 0,
+      };
       bucket.carbon += metric.carbon_tco2e;
       bucket.bioSum += metric.biodiversity_score;
       bucket.bioCount += 1;

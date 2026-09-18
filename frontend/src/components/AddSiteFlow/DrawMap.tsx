@@ -80,7 +80,12 @@ export function DrawMap({ onPolygonChange, className = '' }: DrawMapProps) {
           id: 'gl-draw-polygon-vertex',
           type: 'circle',
           filter: ['all', ['==', '$type', 'Point'], ['==', 'meta', 'vertex']],
-          paint: { 'circle-radius': 5, 'circle-color': '#ffffff', 'circle-stroke-color': '#12372a', 'circle-stroke-width': 2 },
+          paint: {
+            'circle-radius': 5,
+            'circle-color': '#ffffff',
+            'circle-stroke-color': '#12372a',
+            'circle-stroke-width': 2,
+          },
         },
       ],
     });
@@ -128,7 +133,9 @@ export function DrawMap({ onPolygonChange, className = '' }: DrawMapProps) {
 
   if (loadError) {
     return (
-      <div className={`flex items-center justify-center bg-surface-container-high rounded-2xl ${className}`}>
+      <div
+        className={`flex items-center justify-center bg-surface-container-high rounded-2xl ${className}`}
+      >
         <ErrorState
           title="Map could not be loaded."
           description="Check your Mapbox configuration and retry."

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* =========================================================================
    DARUKAA.EARTH — "Obsidian Canopy" Design Tokens
@@ -73,19 +73,19 @@
   --spacing-gutter-sm: 1rem;
 
   /* ---- Font families ---- */
-  --font-label-kpi: "Space Grotesk", sans-serif;
-  --font-headline-lg: "Space Grotesk", sans-serif;
-  --font-headline-xl: "Space Grotesk", sans-serif;
-  --font-label-technical: "JetBrains Mono", monospace;
-  --font-headline-xl-mobile: "Space Grotesk", sans-serif;
-  --font-headline-sm: "Space Grotesk", sans-serif;
-  --font-display-mobile: "Space Grotesk", sans-serif;
-  --font-body-lg: "Plus Jakarta Sans", sans-serif;
-  --font-body-sm: "Plus Jakarta Sans", sans-serif;
-  --font-headline-md: "Space Grotesk", sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
-  --font-label-micro: "JetBrains Mono", monospace;
-  --font-body-md: "Plus Jakarta Sans", sans-serif;
+  --font-label-kpi: 'Space Grotesk', sans-serif;
+  --font-headline-lg: 'Space Grotesk', sans-serif;
+  --font-headline-xl: 'Space Grotesk', sans-serif;
+  --font-label-technical: 'JetBrains Mono', monospace;
+  --font-headline-xl-mobile: 'Space Grotesk', sans-serif;
+  --font-headline-sm: 'Space Grotesk', sans-serif;
+  --font-display-mobile: 'Space Grotesk', sans-serif;
+  --font-body-lg: 'Plus Jakarta Sans', sans-serif;
+  --font-body-sm: 'Plus Jakarta Sans', sans-serif;
+  --font-headline-md: 'Space Grotesk', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-label-micro: 'JetBrains Mono', monospace;
+  --font-body-md: 'Plus Jakarta Sans', sans-serif;
 
   /* ---- Font sizes (with paired line-height / letter-spacing / weight) ---- */
   --text-label-kpi: 2rem;
@@ -172,7 +172,7 @@
     overscroll-behavior: none;
     background-color: var(--color-background, #f3fcf3);
     color: var(--color-on-surface);
-    font-family: "Plus Jakarta Sans", sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.9375rem;
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
@@ -200,7 +200,7 @@
 
 /* Material Symbols Outlined icon font helper class */
 .material-symbols-outlined {
-  font-family: "Material Symbols Outlined";
+  font-family: 'Material Symbols Outlined';
   font-weight: normal;
   font-style: normal;
   font-size: 24px;
@@ -211,7 +211,7 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
-  -webkit-font-feature-settings: "liga";
+  -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
 
@@ -223,18 +223,15 @@
 
 /* Radial glow helper used behind the hero globe */
 .bg-radial-glow {
-  background: radial-gradient(
-    circle,
-    var(--tw-gradient-from, transparent) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, var(--tw-gradient-from, transparent) 0%, transparent 70%);
 }
 
 /* Fade-up scroll reveal animation */
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

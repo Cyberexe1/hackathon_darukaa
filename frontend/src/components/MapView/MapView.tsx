@@ -36,7 +36,10 @@ interface MapViewProps {
   metricValues?: Record<string, number>;
 }
 
-function sitesToFeatureCollection(sites: Site[], metricValues?: Record<string, number>): GeoJSON.FeatureCollection {
+function sitesToFeatureCollection(
+  sites: Site[],
+  metricValues?: Record<string, number>,
+): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
     features: sites.map((site) => ({
@@ -128,7 +131,10 @@ export function MapView({
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
 
     map.on('load', () => {
-      map.addSource('sites', { type: 'geojson', data: sitesToFeatureCollection(sites, metricValues) });
+      map.addSource('sites', {
+        type: 'geojson',
+        data: sitesToFeatureCollection(sites, metricValues),
+      });
 
       map.addLayer({
         id: 'sites-fill',
@@ -165,12 +171,7 @@ export function MapView({
             MAP_COLORS.siteStrokeHover,
             MAP_COLORS.siteStroke,
           ],
-          'line-width': [
-            'case',
-            ['boolean', ['feature-state', 'selected'], false],
-            3,
-            1.5,
-          ],
+          'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 3, 1.5],
         },
       });
 
@@ -193,7 +194,11 @@ export function MapView({
         if (!props) return;
 
         if (!popupRef.current) {
-          popupRef.current = new mapboxgl.Popup({ closeButton: false, closeOnClick: false, offset: 12 });
+          popupRef.current = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+            offset: 12,
+          });
         }
         popupRef.current
           .setLngLat(e.lngLat)
@@ -241,7 +246,10 @@ export function MapView({
     const map = mapRef.current;
     if (!map || !isLoaded) return;
     sites.forEach((site) => {
-      map.setFeatureState({ source: 'sites', id: site.id }, { selected: site.id === selectedSiteId });
+      map.setFeatureState(
+        { source: 'sites', id: site.id },
+        { selected: site.id === selectedSiteId },
+      );
     });
   }, [selectedSiteId, sites, isLoaded]);
 
@@ -251,7 +259,10 @@ export function MapView({
     if (!map || !isLoaded) return;
     map.setStyle(isSatellite ? MAPBOX_STYLE_SATELLITE : MAPBOX_STYLE_LIGHT);
     map.once('style.load', () => {
-      map.addSource('sites', { type: 'geojson', data: sitesToFeatureCollection(sites, metricValues) });
+      map.addSource('sites', {
+        type: 'geojson',
+        data: sitesToFeatureCollection(sites, metricValues),
+      });
       map.addLayer({
         id: 'sites-fill',
         type: 'fill',
@@ -274,7 +285,8 @@ export function MapView({
     if (!map || !isLoaded) return;
     const visibility = layers.sites ? 'visible' : 'none';
     if (map.getLayer('sites-fill')) map.setLayoutProperty('sites-fill', 'visibility', visibility);
-    if (map.getLayer('sites-outline')) map.setLayoutProperty('sites-outline', 'visibility', visibility);
+    if (map.getLayer('sites-outline'))
+      map.setLayoutProperty('sites-outline', 'visibility', visibility);
   }, [layers.sites, isLoaded]);
 
   // Keep the source data (including `metricValue`) fresh if the sites
@@ -327,15 +339,7 @@ export function MapView({
       'case',
       ['==', ['get', 'metricValue'], null],
       MAP_COLORS.siteFill,
-      [
-        'interpolate',
-        ['linear'],
-        ['get', 'metricValue'],
-        min,
-        color.low,
-        safeMax,
-        color.high,
-      ],
+      ['interpolate', ['linear'], ['get', 'metricValue'], min, color.low, safeMax, color.high],
     ]);
     map.setPaintProperty('sites-fill', 'fill-opacity', [
       'case',
@@ -349,7 +353,9 @@ export function MapView({
 
   if (loadError) {
     return (
-      <div className={`flex items-center justify-center bg-surface-container-high rounded-2xl ${className}`}>
+      <div
+        className={`flex items-center justify-center bg-surface-container-high rounded-2xl ${className}`}
+      >
         <ErrorState
           title="Map could not be loaded."
           description="Check your Mapbox configuration and retry."
@@ -373,7 +379,9 @@ export function MapView({
 
       {isLoaded && showLayerControl && (
         <div className="absolute top-3 left-3 bg-surface-container-lowest/95 backdrop-blur-md rounded-xl shadow-md p-space-sm max-w-[200px]">
-          <p className="font-label-technical text-label-micro text-on-surface-variant uppercase mb-space-xs">Layers</p>
+          <p className="font-label-technical text-label-micro text-on-surface-variant uppercase mb-space-xs">
+            Layers
+          </p>
           {(['projects', 'sites', 'carbon', 'biodiversity', 'vegetation'] as const).map((layer) => (
             <label
               key={layer}

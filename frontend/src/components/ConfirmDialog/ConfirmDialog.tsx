@@ -43,7 +43,10 @@ export function ConfirmDialog({
           className="inline-flex items-center gap-space-sm bg-error text-on-primary px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isConfirming ? (
-            <span className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin" aria-hidden="true" />
+            <span
+              className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin"
+              aria-hidden="true"
+            />
           ) : (
             confirmLabel
           )}

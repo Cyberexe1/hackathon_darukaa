@@ -10,17 +10,27 @@ import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 // and Turf.js — none of which the public landing/auth pages need. Lazy
 // loading these keeps the public bundle light and only fetches the heavy
 // geospatial/analytics chunks once a signed-in user actually navigates in.
-const DashboardPage = lazy(() => import('./pages/Dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })));
-const ProjectsPage = lazy(() => import('./pages/Projects/ProjectsPage').then((m) => ({ default: m.ProjectsPage })));
+const DashboardPage = lazy(() =>
+  import('./pages/Dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+);
+const ProjectsPage = lazy(() =>
+  import('./pages/Projects/ProjectsPage').then((m) => ({ default: m.ProjectsPage })),
+);
 const ProjectDetailPage = lazy(() =>
   import('./pages/ProjectDetail/ProjectDetailPage').then((m) => ({ default: m.ProjectDetailPage })),
 );
-const SitesPage = lazy(() => import('./pages/Sites/SitesPage').then((m) => ({ default: m.SitesPage })));
+const SitesPage = lazy(() =>
+  import('./pages/Sites/SitesPage').then((m) => ({ default: m.SitesPage })),
+);
 const SiteAnalyticsPage = lazy(() =>
   import('./pages/SiteAnalytics/SiteAnalyticsPage').then((m) => ({ default: m.SiteAnalyticsPage })),
 );
-const AnalyticsPage = lazy(() => import('./pages/Analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })));
-const SettingsPage = lazy(() => import('./pages/Settings/SettingsPage').then((m) => ({ default: m.SettingsPage })));
+const AnalyticsPage = lazy(() =>
+  import('./pages/Analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
+);
+const SettingsPage = lazy(() =>
+  import('./pages/Settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+);
 
 function DashboardFallback() {
   return (

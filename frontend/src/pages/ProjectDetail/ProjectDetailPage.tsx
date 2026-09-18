@@ -40,7 +40,10 @@ export function ProjectDetailPage() {
   // no visible effect.
   const isLoadingProject = !project && isFetchingProject;
 
-  const sites = useMemo(() => (projectId ? getSitesByProjectId(projectId) : []), [projectId, getSitesByProjectId]);
+  const sites = useMemo(
+    () => (projectId ? getSitesByProjectId(projectId) : []),
+    [projectId, getSitesByProjectId],
+  );
 
   useEffect(() => {
     fetchSites();
@@ -114,7 +117,9 @@ export function ProjectDetailPage() {
         <div className="p-4 md:p-space-lg max-w-[900px] mx-auto">
           <ErrorState
             title="Unable to load project data."
-            description={projectError ?? 'This project may have been removed or the link is incorrect.'}
+            description={
+              projectError ?? 'This project may have been removed or the link is incorrect.'
+            }
             onRetry={() => navigate('/projects')}
           />
         </div>
@@ -122,15 +127,22 @@ export function ProjectDetailPage() {
     );
   }
 
-  const selectedSite = selectedSiteId ? getSiteById(selectedSiteId) ?? null : null;
+  const selectedSite = selectedSiteId ? (getSiteById(selectedSiteId) ?? null) : null;
 
   return (
     <DashboardLayout pageTitle={project.name}>
       <div className="p-4 md:p-space-lg max-w-[1600px] mx-auto flex flex-col gap-space-lg">
-        <nav aria-label="Breadcrumb" className="font-label-technical text-label-micro text-on-surface-variant">
-          <Link to="/dashboard" className="hover:text-primary">Dashboard</Link>
+        <nav
+          aria-label="Breadcrumb"
+          className="font-label-technical text-label-micro text-on-surface-variant"
+        >
+          <Link to="/dashboard" className="hover:text-primary">
+            Dashboard
+          </Link>
           <span className="mx-1">/</span>
-          <Link to="/projects" className="hover:text-primary">Projects</Link>
+          <Link to="/projects" className="hover:text-primary">
+            Projects
+          </Link>
           <span className="mx-1">/</span>
           <span className="text-primary">{project.name}</span>
         </nav>
@@ -141,7 +153,9 @@ export function ProjectDetailPage() {
               <h2 className="font-headline-lg text-headline-lg text-primary">{project.name}</h2>
               <StatusBadge status={project.status} />
             </div>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">{project.description}</p>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+              {project.description}
+            </p>
             <p className="font-label-technical text-label-micro text-on-surface-variant mt-space-xs uppercase">
               {project.project_type} &middot; {project.region}, {project.country}
             </p>
@@ -150,17 +164,27 @@ export function ProjectDetailPage() {
 
         {isLoadingAnalytics ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-            {Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)}
+            {Array.from({ length: 4 }).map((_, i) => (
+              <KpiCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
             <KpiCard icon="pin_drop" label="Sites" target={project.site_count} />
-            <KpiCard icon="satellite_alt" label="Area" target={project.total_area_hectares} suffix=" ha" formatValue={(v) => v.toLocaleString()} />
+            <KpiCard
+              icon="satellite_alt"
+              label="Area"
+              target={project.total_area_hectares}
+              suffix=" ha"
+              formatValue={(v) => v.toLocaleString()}
+            />
             <KpiCard
               icon="co2"
               label="Carbon"
               target={analytics?.summary.carbon_total ?? undefined}
-              staticValue={analytics?.summary.carbon_total == null ? 'No data available' : undefined}
+              staticValue={
+                analytics?.summary.carbon_total == null ? 'No data available' : undefined
+              }
               suffix={analytics?.summary.carbon_total != null ? ' tCO\u2082e' : undefined}
               formatValue={(v) => v.toLocaleString()}
               tone="accent"
@@ -169,16 +193,24 @@ export function ProjectDetailPage() {
               icon="eco"
               label="Biodiversity"
               target={analytics?.summary.avg_biodiversity_score ?? undefined}
-              staticValue={analytics?.summary.avg_biodiversity_score == null ? 'No data available' : undefined}
+              staticValue={
+                analytics?.summary.avg_biodiversity_score == null ? 'No data available' : undefined
+              }
               suffix={analytics?.summary.avg_biodiversity_score != null ? ' / 100' : undefined}
             />
           </div>
         )}
 
         <div className="bg-surface-container-lowest rounded-2xl shadow-sm p-space-sm md:p-space-md">
-          <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm px-space-sm">Project Map</h3>
+          <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm px-space-sm">
+            Project Map
+          </h3>
           {sites.length === 0 ? (
-            <EmptyState icon="pin_drop" title="No geographical sites have been added." description="Add a site to see it on the map." />
+            <EmptyState
+              icon="pin_drop"
+              title="No geographical sites have been added."
+              description="Add a site to see it on the map."
+            />
           ) : (
             <MapView
               sites={sites}

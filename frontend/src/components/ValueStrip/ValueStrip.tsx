@@ -5,7 +5,8 @@ const PILLARS: ValuePillar[] = [
   {
     icon: 'polyline',
     title: 'Geospatial Mapping',
-    description: 'Map every project and parcel. Geodesic coordinates with sub-meter vector integrity.',
+    description:
+      'Map every project and parcel. Geodesic coordinates with sub-meter vector integrity.',
   },
   {
     icon: 'co2',
@@ -16,12 +17,14 @@ const PILLARS: ValuePillar[] = [
   {
     icon: 'nature',
     title: 'Biodiversity Analytics',
-    description: 'Evaluate floral canopy stratigraphy, habitat fragmentation, and ecological health scores.',
+    description:
+      'Evaluate floral canopy stratigraphy, habitat fragmentation, and ecological health scores.',
   },
   {
     icon: 'insights',
     title: 'Project Decisions',
-    description: 'Convert raw orbital telemetry into definitive investment and compliance decisions.',
+    description:
+      'Convert raw orbital telemetry into definitive investment and compliance decisions.',
   },
 ];
 
@@ -48,8 +51,12 @@ export function ValueStrip() {
                     {pillar.icon}
                   </span>
                 </div>
-                <h3 className="font-headline-sm text-headline-sm text-primary mb-1">{pillar.title}</h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">{pillar.description}</p>
+                <h3 className="font-headline-sm text-headline-sm text-primary mb-1">
+                  {pillar.title}
+                </h3>
+                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                  {pillar.description}
+                </p>
               </div>
             </Reveal>
           ))}

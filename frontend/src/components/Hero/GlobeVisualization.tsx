@@ -104,7 +104,8 @@ export function GlobeVisualization() {
       positions[i * 3 + 1] = r * Math.cos(phi);
       positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
 
-      const chosenCol = Math.random() > 0.65 ? emeraldCol : Math.random() > 0.4 ? cyanCol : primaryCol;
+      const chosenCol =
+        Math.random() > 0.65 ? emeraldCol : Math.random() > 0.4 ? cyanCol : primaryCol;
       colors[i * 3] = chosenCol.r;
       colors[i * 3 + 1] = chosenCol.g;
       colors[i * 3 + 2] = chosenCol.b;
@@ -149,7 +150,11 @@ export function GlobeVisualization() {
 
       const spikePos = pos.clone().multiplyScalar(1.08);
       const spikeGeo = new THREE.BufferGeometry().setFromPoints([pos, spikePos]);
-      const spikeMat = new THREE.LineBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.8 });
+      const spikeMat = new THREE.LineBasicMaterial({
+        color: 0x10b981,
+        transparent: true,
+        opacity: 0.8,
+      });
       earthGroup.add(new THREE.Line(spikeGeo, spikeMat));
 
       markerMeshes.push({ beacon: beaconMesh, ring: ringMesh });

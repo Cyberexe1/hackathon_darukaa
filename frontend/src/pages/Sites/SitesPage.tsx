@@ -31,7 +31,9 @@ export function SitesPage() {
             onClick={() => setAddOpen(true)}
             className="inline-flex items-center justify-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-md rounded-lg font-headline-sm text-body-md transition-all duration-200 hover:bg-primary shadow-md shrink-0"
           >
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">add</span>
+            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+              add
+            </span>
             Add Site
           </button>
         </div>

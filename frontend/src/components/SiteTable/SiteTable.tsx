@@ -24,13 +24,29 @@ export function SiteTable({ sites, showProjectColumn = true }: SiteTableProps) {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-surface-container-low font-label-technical text-label-micro text-on-surface-variant uppercase">
-              <th scope="col" className="py-space-sm px-space-lg">Site</th>
-              {showProjectColumn && <th scope="col" className="py-space-sm px-space-md">Project</th>}
-              <th scope="col" className="py-space-sm px-space-md">Area</th>
-              <th scope="col" className="py-space-sm px-space-md">Carbon</th>
-              <th scope="col" className="py-space-sm px-space-md">Biodiversity</th>
-              <th scope="col" className="py-space-sm px-space-md">Status</th>
-              <th scope="col" className="py-space-sm px-space-lg text-right">Actions</th>
+              <th scope="col" className="py-space-sm px-space-lg">
+                Site
+              </th>
+              {showProjectColumn && (
+                <th scope="col" className="py-space-sm px-space-md">
+                  Project
+                </th>
+              )}
+              <th scope="col" className="py-space-sm px-space-md">
+                Area
+              </th>
+              <th scope="col" className="py-space-sm px-space-md">
+                Carbon
+              </th>
+              <th scope="col" className="py-space-sm px-space-md">
+                Biodiversity
+              </th>
+              <th scope="col" className="py-space-sm px-space-md">
+                Status
+              </th>
+              <th scope="col" className="py-space-sm px-space-lg text-right">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/20 font-body-sm text-body-sm">
@@ -39,15 +55,21 @@ export function SiteTable({ sites, showProjectColumn = true }: SiteTableProps) {
               return (
                 <tr key={site.id} className="hover:bg-surface-container-low/50 transition-colors">
                   <td className="py-space-md px-space-lg">
-                    <div className="font-headline-sm text-headline-sm text-primary">{site.name}</div>
+                    <div className="font-headline-sm text-headline-sm text-primary">
+                      {site.name}
+                    </div>
                     <div className="font-label-technical text-label-micro text-on-surface-variant">
                       {site.centroid.lat.toFixed(3)}&deg;, {site.centroid.lon.toFixed(3)}&deg;
                     </div>
                   </td>
                   {showProjectColumn && (
-                    <td className="py-space-md px-space-md text-on-surface">{project?.name ?? '—'}</td>
+                    <td className="py-space-md px-space-md text-on-surface">
+                      {project?.name ?? '—'}
+                    </td>
                   )}
-                  <td className="py-space-md px-space-md text-primary font-medium">{site.area_hectares.toLocaleString()} ha</td>
+                  <td className="py-space-md px-space-md text-primary font-medium">
+                    {site.area_hectares.toLocaleString()} ha
+                  </td>
                   <td className="py-space-md px-space-md text-on-surface-variant">—</td>
                   <td className="py-space-md px-space-md text-on-surface-variant">—</td>
                   <td className="py-space-md px-space-md">
@@ -82,7 +104,12 @@ export function SiteTable({ sites, showProjectColumn = true }: SiteTableProps) {
               <StatusBadge status={site.status} />
             </div>
             <div className="flex items-center gap-space-md font-body-sm text-body-sm text-on-surface-variant">
-              <span>Area: <span className="text-primary font-medium">{site.area_hectares.toLocaleString()} ha</span></span>
+              <span>
+                Area:{' '}
+                <span className="text-primary font-medium">
+                  {site.area_hectares.toLocaleString()} ha
+                </span>
+              </span>
             </div>
           </button>
         ))}

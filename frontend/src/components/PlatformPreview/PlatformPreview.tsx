@@ -8,13 +8,19 @@ import { Reveal } from '../Reveal/Reveal';
  */
 export function PlatformPreview() {
   return (
-    <section className="w-full py-margin-wide bg-surface overflow-hidden" aria-labelledby="platform-preview-heading">
+    <section
+      className="w-full py-margin-wide bg-surface overflow-hidden"
+      aria-labelledby="platform-preview-heading"
+    >
       <div className="w-full px-4 sm:px-gutter-lg max-w-[1720px] mx-auto">
         <Reveal as="div" className="max-w-3xl mb-space-xl">
           <span className="font-label-technical text-label-technical text-surface-tint uppercase tracking-widest font-semibold block mb-space-xs">
             PLANETARY ENGINE &bull; COMMAND WORKSPACE
           </span>
-          <h2 id="platform-preview-heading" className="font-headline-xl text-headline-xl text-primary tracking-tight mb-space-sm">
+          <h2
+            id="platform-preview-heading"
+            className="font-headline-xl text-headline-xl text-primary tracking-tight mb-space-sm"
+          >
             From boundaries to biodiversity.
           </h2>
           <p className="font-body-lg text-body-lg text-on-surface-variant">
@@ -23,7 +29,10 @@ export function PlatformPreview() {
           </p>
         </Reveal>
 
-        <Reveal id="platform-preview" className="w-full bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden">
+        <Reveal
+          id="platform-preview"
+          className="w-full bg-surface-container-lowest rounded-2xl shadow-xl overflow-hidden"
+        >
           {/* Window chrome */}
           <div className="bg-surface-container-high px-space-md py-space-sm flex items-center justify-between">
             <div className="flex items-center gap-space-xs">
@@ -49,13 +58,17 @@ export function PlatformPreview() {
               <div className="font-label-technical text-label-micro text-on-surface-variant uppercase">
                 Portfolio Scope
               </div>
-              <div className="font-headline-sm text-headline-sm text-primary">12 Active Projects</div>
+              <div className="font-headline-sm text-headline-sm text-primary">
+                12 Active Projects
+              </div>
             </div>
             <div className="p-space-md">
               <div className="font-label-technical text-label-micro text-on-surface-variant uppercase">
                 Mapped Parcels
               </div>
-              <div className="font-headline-sm text-headline-sm text-primary">38 Discrete Sites</div>
+              <div className="font-headline-sm text-headline-sm text-primary">
+                38 Discrete Sites
+              </div>
             </div>
             <div className="p-space-md">
               <div className="font-label-technical text-label-micro text-on-surface-variant uppercase">
@@ -67,7 +80,9 @@ export function PlatformPreview() {
               <div className="font-label-technical text-label-micro text-on-surface-variant uppercase">
                 Net Sequestration
               </div>
-              <div className="font-headline-sm text-headline-sm text-surface-tint">18,412 tCO&#8322;e</div>
+              <div className="font-headline-sm text-headline-sm text-surface-tint">
+                18,412 tCO&#8322;e
+              </div>
             </div>
           </div>
 
@@ -114,7 +129,9 @@ export function PlatformPreview() {
                     </span>
                     Sites
                   </span>
-                  <span className="font-label-technical text-label-micro text-on-surface-variant">38</span>
+                  <span className="font-label-technical text-label-micro text-on-surface-variant">
+                    38
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -170,14 +187,74 @@ export function PlatformPreview() {
                 role="img"
                 aria-label="Interactive map showing project site boundary polygons"
               >
-                <line stroke="#717974" strokeDasharray="4 4" strokeOpacity="0.15" x1="0" x2="700" y1="125" y2="125" />
-                <line stroke="#717974" strokeDasharray="4 4" strokeOpacity="0.15" x1="0" x2="700" y1="250" y2="250" />
-                <line stroke="#717974" strokeDasharray="4 4" strokeOpacity="0.15" x1="0" x2="700" y1="375" y2="375" />
-                <line stroke="#717974" strokeDasharray="4 4" strokeOpacity="0.15" x1="175" x2="175" y1="0" y2="500" />
-                <line stroke="#717974" strokeDasharray="4 4" strokeOpacity="0.15" x1="350" x2="350" y1="0" y2="500" />
-                <line stroke="#717974" strokeDasharray="4 4" strokeOpacity="0.15" x1="525" x2="525" y1="0" y2="500" />
-                <polygon fill="#003640" fillOpacity="0.25" points="120,80 240,60 280,160 160,190" stroke="#00a7c3" strokeWidth="1.5" />
-                <polygon fill="#6c5c46" fillOpacity="0.25" points="460,280 620,240 660,390 510,430 430,350" stroke="#72624b" strokeWidth="1.5" />
+                <line
+                  stroke="#717974"
+                  strokeDasharray="4 4"
+                  strokeOpacity="0.15"
+                  x1="0"
+                  x2="700"
+                  y1="125"
+                  y2="125"
+                />
+                <line
+                  stroke="#717974"
+                  strokeDasharray="4 4"
+                  strokeOpacity="0.15"
+                  x1="0"
+                  x2="700"
+                  y1="250"
+                  y2="250"
+                />
+                <line
+                  stroke="#717974"
+                  strokeDasharray="4 4"
+                  strokeOpacity="0.15"
+                  x1="0"
+                  x2="700"
+                  y1="375"
+                  y2="375"
+                />
+                <line
+                  stroke="#717974"
+                  strokeDasharray="4 4"
+                  strokeOpacity="0.15"
+                  x1="175"
+                  x2="175"
+                  y1="0"
+                  y2="500"
+                />
+                <line
+                  stroke="#717974"
+                  strokeDasharray="4 4"
+                  strokeOpacity="0.15"
+                  x1="350"
+                  x2="350"
+                  y1="0"
+                  y2="500"
+                />
+                <line
+                  stroke="#717974"
+                  strokeDasharray="4 4"
+                  strokeOpacity="0.15"
+                  x1="525"
+                  x2="525"
+                  y1="0"
+                  y2="500"
+                />
+                <polygon
+                  fill="#003640"
+                  fillOpacity="0.25"
+                  points="120,80 240,60 280,160 160,190"
+                  stroke="#00a7c3"
+                  strokeWidth="1.5"
+                />
+                <polygon
+                  fill="#6c5c46"
+                  fillOpacity="0.25"
+                  points="460,280 620,240 660,390 510,430 430,350"
+                  stroke="#72624b"
+                  strokeWidth="1.5"
+                />
                 <polygon
                   fill="#12372a"
                   fillOpacity="0.3"
@@ -200,24 +277,49 @@ export function PlatformPreview() {
               </div>
 
               <div className="absolute bottom-4 left-4 bg-surface-container-lowest/90 backdrop-blur-md p-space-xs rounded-lg shadow-md flex items-center gap-1">
-                <button type="button" className="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container text-primary" aria-label="Zoom in">
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+                <button
+                  type="button"
+                  className="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container text-primary"
+                  aria-label="Zoom in"
+                >
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                    add
+                  </span>
                 </button>
-                <button type="button" className="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container text-primary" aria-label="Zoom out">
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">remove</span>
+                <button
+                  type="button"
+                  className="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container text-primary"
+                  aria-label="Zoom out"
+                >
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                    remove
+                  </span>
                 </button>
                 <div className="w-px h-4 bg-outline-variant/30" />
-                <button type="button" className="px-space-xs py-1 rounded text-body-sm font-label-technical text-label-micro text-primary hover:bg-surface-container flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px]" aria-hidden="true">layers</span> Layers
+                <button
+                  type="button"
+                  className="px-space-xs py-1 rounded text-body-sm font-label-technical text-label-micro text-primary hover:bg-surface-container flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+                    layers
+                  </span>{' '}
+                  Layers
                 </button>
-                <button type="button" className="px-space-xs py-1 rounded text-body-sm font-label-technical text-label-micro text-primary hover:bg-surface-container">
+                <button
+                  type="button"
+                  className="px-space-xs py-1 rounded text-body-sm font-label-technical text-label-micro text-primary hover:bg-surface-container"
+                >
                   Satellite
                 </button>
               </div>
 
               <div className="absolute top-[48%] left-[45%] -translate-x-1/2 -translate-y-1/2 bg-surface-container-lowest/90 backdrop-blur px-space-sm py-space-xs rounded shadow-sm text-center">
-                <span className="font-headline-sm text-headline-sm text-primary block leading-none">SITE A</span>
-                <span className="font-label-technical text-label-micro text-on-surface-variant">142.8 Hectares</span>
+                <span className="font-headline-sm text-headline-sm text-primary block leading-none">
+                  SITE A
+                </span>
+                <span className="font-label-technical text-label-micro text-on-surface-variant">
+                  142.8 Hectares
+                </span>
               </div>
             </div>
 
@@ -232,7 +334,9 @@ export function PlatformPreview() {
                     <span className="w-1.5 h-1.5 rounded-full bg-surface-tint" /> ACTIVE
                   </span>
                 </div>
-                <h4 className="font-headline-md text-headline-md text-primary mb-1">Western Ghats — Site A</h4>
+                <h4 className="font-headline-md text-headline-md text-primary mb-1">
+                  Western Ghats — Site A
+                </h4>
                 <p className="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
                   Wet evergreen rainforest restoration reserve.
                 </p>
@@ -247,7 +351,9 @@ export function PlatformPreview() {
                     <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
                       Biomass Carbon
                     </span>
-                    <span className="font-headline-sm text-headline-sm text-primary">2,840 tCO&#8322;e</span>
+                    <span className="font-headline-sm text-headline-sm text-primary">
+                      2,840 tCO&#8322;e
+                    </span>
                   </div>
                   <div className="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg">
                     <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
@@ -259,7 +365,9 @@ export function PlatformPreview() {
                     <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
                       Mean NDVI Index
                     </span>
-                    <span className="font-headline-sm text-headline-sm text-surface-tint">0.78 &plusmn; 0.04</span>
+                    <span className="font-headline-sm text-headline-sm text-surface-tint">
+                      0.78 &plusmn; 0.04
+                    </span>
                   </div>
                 </div>
               </div>
@@ -268,14 +376,18 @@ export function PlatformPreview() {
                   type="button"
                   className="w-full bg-primary-container text-on-primary py-space-sm rounded-lg font-headline-sm text-body-sm flex items-center justify-center gap-2 hover:bg-primary transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">download</span>
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                    download
+                  </span>
                   Export GeoJSON
                 </button>
                 <button
                   type="button"
                   className="w-full bg-surface-container text-primary py-space-sm rounded-lg font-headline-sm text-body-sm flex items-center justify-center gap-2 hover:bg-surface-container-high transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">file_open</span>
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                    file_open
+                  </span>
                   Run Biomass Audit
                 </button>
               </div>

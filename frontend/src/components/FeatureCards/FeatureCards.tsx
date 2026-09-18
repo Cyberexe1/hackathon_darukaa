@@ -61,8 +61,8 @@ export function FeatureCards() {
             Engineered for institutional scale.
           </h2>
           <p className="font-body-lg text-body-lg text-on-surface-variant">
-            Six foundational architectural pillars designed for high-conviction environmental
-            asset allocation.
+            Six foundational architectural pillars designed for high-conviction environmental asset
+            allocation.
           </p>
         </Reveal>
 
@@ -76,8 +76,12 @@ export function FeatureCards() {
                       {feature.icon}
                     </span>
                   </div>
-                  <h3 className="font-headline-md text-headline-md text-primary mb-space-xs">{feature.title}</h3>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">{feature.description}</p>
+                  <h3 className="font-headline-md text-headline-md text-primary mb-space-xs">
+                    {feature.title}
+                  </h3>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">
+                    {feature.description}
+                  </p>
                 </div>
                 <div className="mt-space-lg font-label-technical text-label-micro text-surface-tint">
                   {feature.tag}

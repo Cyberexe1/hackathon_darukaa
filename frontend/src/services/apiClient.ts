@@ -27,13 +27,20 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Centralized 401 handling: clear the stale token so ProtectedRoute can
-// redirect to /signin on the next render.
+// Centralized 401 handling: clear the stale token immediately and notify
+// the rest of the app via a DOM event (avoids a circular import between
+// apiClient <-> authStore, since authStore already depends on authService
+// which depends on apiClient). authStore listens for this event and
+// updates its in-memory state synchronously, so ProtectedRoute redirects
+// to /signin right away instead of only on the next page load/hydrate.
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('darukaa_auth_token');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('darukaa:unauthorized'));
+      }
     }
     return Promise.reject(error);
   },

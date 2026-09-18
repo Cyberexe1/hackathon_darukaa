@@ -56,8 +56,8 @@ export function Hero() {
 
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-space-xl">
               Darukaa.Earth transforms environmental project data into actionable geospatial
-              intelligence — helping sovereign funds, carbon auditors, and land stewards map
-              sites, monitor biometrics, and prove planetary restoration.
+              intelligence — helping sovereign funds, carbon auditors, and land stewards map sites,
+              monitor biometrics, and prove planetary restoration.
             </p>
 
             <div className="flex flex-wrap items-center gap-space-md">
@@ -87,7 +87,10 @@ export function Hero() {
                 <span>See How It Works</span>
               </a>
               <div className="hidden xl:flex items-center gap-space-xs pl-space-md text-on-surface-variant font-label-technical text-label-technical">
-                <span className="material-symbols-outlined text-[16px] text-surface-tint" aria-hidden="true">
+                <span
+                  className="material-symbols-outlined text-[16px] text-surface-tint"
+                  aria-hidden="true"
+                >
                   radar
                 </span>
                 <span>WGS84 EPSG:4326 | SENTINEL-2 SYNCED</span>
@@ -102,13 +105,17 @@ export function Hero() {
                 </div>
               </div>
               <div>
-                <div className="font-headline-lg text-headline-lg text-primary leading-none">18.4K</div>
+                <div className="font-headline-lg text-headline-lg text-primary leading-none">
+                  18.4K
+                </div>
                 <div className="font-label-technical text-label-technical text-on-surface-variant mt-1 uppercase">
                   tCO&#8322;e Sequestered
                 </div>
               </div>
               <div>
-                <div className="font-headline-lg text-headline-lg text-primary leading-none">99.4%</div>
+                <div className="font-headline-lg text-headline-lg text-primary leading-none">
+                  99.4%
+                </div>
                 <div className="font-label-technical text-label-technical text-on-surface-variant mt-1 uppercase">
                   Polygon Precision
                 </div>
@@ -148,11 +155,28 @@ export function Hero() {
                 </span>
               </div>
               <div className="font-headline-md text-headline-md text-primary">
-                +18.4K <span className="font-body-sm text-body-sm text-on-surface-variant">tCO&#8322;e</span>
+                +18.4K{' '}
+                <span className="font-body-sm text-body-sm text-on-surface-variant">
+                  tCO&#8322;e
+                </span>
               </div>
-              <svg className="w-full h-7 mt-2 text-surface-tint overflow-visible" fill="none" stroke="currentColor" viewBox="0 0 100 24" aria-hidden="true">
-                <path d="M0 20 Q 25 18, 40 12 T 70 8 T 100 2" strokeLinecap="round" strokeWidth="2.5" />
-                <path d="M0 20 Q 25 18, 40 12 T 70 8 T 100 2 L 100 24 L 0 24 Z" fill="currentColor" fillOpacity="0.12" />
+              <svg
+                className="w-full h-7 mt-2 text-surface-tint overflow-visible"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 100 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M0 20 Q 25 18, 40 12 T 70 8 T 100 2"
+                  strokeLinecap="round"
+                  strokeWidth="2.5"
+                />
+                <path
+                  d="M0 20 Q 25 18, 40 12 T 70 8 T 100 2 L 100 24 L 0 24 Z"
+                  fill="currentColor"
+                  fillOpacity="0.12"
+                />
               </svg>
             </div>
 
@@ -194,11 +218,16 @@ export function Hero() {
 
             {/* Floating HUD 4: Area Monitored */}
             <div className="absolute -bottom-6 right-4 md:right-8 bg-surface-container-lowest/90 backdrop-blur-md px-space-md py-space-sm rounded-xl shadow-lg flex items-center gap-space-sm z-20">
-              <span className="material-symbols-outlined text-surface-tint text-[18px]" aria-hidden="true">
+              <span
+                className="material-symbols-outlined text-surface-tint text-[18px]"
+                aria-hidden="true"
+              >
                 satellite_alt
               </span>
               <div className="flex flex-col">
-                <span className="font-headline-sm text-headline-sm text-primary leading-tight">4,280 ha</span>
+                <span className="font-headline-sm text-headline-sm text-primary leading-tight">
+                  4,280 ha
+                </span>
                 <span className="font-label-technical text-label-micro text-on-surface-variant">
                   99.4% VERIFIED PRECISION
                 </span>

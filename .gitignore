@@ -1,0 +1,18 @@
+# Root-level ignores for the monorepo tooling (Husky/lint-staged).
+# Subproject-specific ignores live in frontend/.gitignore and backend/.gitignore.
+
+node_modules/
+
+# Environment files — never commit real secrets. Only *.env.example files
+# should ever be tracked.
+.env
+.env.local
+.env.production
+.env.*.local
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+
+# Kirograph local index — machine-specific, not part of the app.
+.kirograph/

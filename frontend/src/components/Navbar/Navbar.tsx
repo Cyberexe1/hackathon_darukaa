@@ -50,7 +50,10 @@ export function Navbar() {
       <div className="h-20 w-full px-4 sm:px-gutter-lg flex items-center justify-between max-w-[1720px] mx-auto">
         <Link to="/" className="flex items-center gap-space-md" aria-label="Darukaa.Earth home">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-on-primary text-[18px]" aria-hidden="true">
+            <span
+              className="material-symbols-outlined text-on-primary text-[18px]"
+              aria-hidden="true"
+            >
               public
             </span>
           </div>

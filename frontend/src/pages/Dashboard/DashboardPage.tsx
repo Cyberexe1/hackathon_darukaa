@@ -64,10 +64,13 @@ export function DashboardPage() {
     loadAnalytics();
   }, [loadAnalytics]);
 
-  const totalArea = analytics?.total_area_hectares ?? sites.reduce((sum, s) => sum + s.area_hectares, 0);
-  const activeSites = analytics?.active_sites ?? sites.filter((s) => s.status === 'Active' || s.status === 'Verified').length;
+  const totalArea =
+    analytics?.total_area_hectares ?? sites.reduce((sum, s) => sum + s.area_hectares, 0);
+  const activeSites =
+    analytics?.active_sites ??
+    sites.filter((s) => s.status === 'Active' || s.status === 'Verified').length;
 
-  const selectedSite = selectedSiteId ? getSiteById(selectedSiteId) ?? null : null;
+  const selectedSite = selectedSiteId ? (getSiteById(selectedSiteId) ?? null) : null;
   const recentProjects = [...projects]
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 5);
@@ -77,7 +80,9 @@ export function DashboardPage() {
       <div className="p-4 md:p-space-lg max-w-[1600px] mx-auto flex flex-col gap-space-lg">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-space-md">
           <div>
-            <h2 className="font-headline-lg text-headline-lg text-primary mb-1">Environmental Overview</h2>
+            <h2 className="font-headline-lg text-headline-lg text-primary mb-1">
+              Environmental Overview
+            </h2>
             <p className="font-body-md text-body-md text-on-surface-variant">
               Monitor your projects, sites and environmental impact from one place.
             </p>
@@ -87,7 +92,9 @@ export function DashboardPage() {
             onClick={() => setCreateOpen(true)}
             className="group inline-flex items-center justify-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-md rounded-lg font-headline-sm text-body-md transition-all duration-200 hover:bg-primary shadow-md shrink-0"
           >
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">add</span>
+            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
+              add
+            </span>
             Create Project
           </button>
         </div>
@@ -95,7 +102,9 @@ export function DashboardPage() {
         {/* Primary KPI row — database-driven via GET /analytics/dashboard (falls back to store-derived counts if that call fails). */}
         {isLoadingAnalytics ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-            {Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)}
+            {Array.from({ length: 4 }).map((_, i) => (
+              <KpiCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
@@ -136,12 +145,20 @@ export function DashboardPage() {
           <CompactKpiCard
             icon="eco"
             label="Biodiversity Score"
-            value={analytics?.avg_biodiversity_score != null ? `${analytics.avg_biodiversity_score} / 100` : 'No data available'}
+            value={
+              analytics?.avg_biodiversity_score != null
+                ? `${analytics.avg_biodiversity_score} / 100`
+                : 'No data available'
+            }
           />
           <CompactKpiCard
             icon="grass"
             label="Vegetation Index"
-            value={analytics?.avg_vegetation_index != null ? analytics.avg_vegetation_index.toFixed(2) : 'No data available'}
+            value={
+              analytics?.avg_vegetation_index != null
+                ? analytics.avg_vegetation_index.toFixed(2)
+                : 'No data available'
+            }
           />
           <CompactKpiCard icon="check_circle" label="Active Sites" value={String(activeSites)} />
           <CompactKpiCard icon="folder" label="Projects" value={String(projects.length)} />
@@ -150,7 +167,11 @@ export function DashboardPage() {
         {analyticsError && (
           <p className="font-body-sm text-body-sm text-on-surface-variant -mt-space-sm">
             {analyticsError}{' '}
-            <button type="button" onClick={loadAnalytics} className="text-surface-tint hover:text-primary underline">
+            <button
+              type="button"
+              onClick={loadAnalytics}
+              className="text-surface-tint hover:text-primary underline"
+            >
               Retry
             </button>
           </p>
@@ -159,7 +180,9 @@ export function DashboardPage() {
         {/* Main geospatial map */}
         <div className="bg-surface-container-lowest rounded-2xl shadow-sm p-space-sm md:p-space-md">
           <div className="flex items-center justify-between mb-space-sm px-space-sm">
-            <h3 className="font-headline-sm text-headline-sm text-primary">Project &amp; Site Map</h3>
+            <h3 className="font-headline-sm text-headline-sm text-primary">
+              Project &amp; Site Map
+            </h3>
             <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
               {sites.length} {sites.length === 1 ? 'site' : 'sites'}
             </span>
@@ -188,7 +211,11 @@ export function DashboardPage() {
 
           {isLoading && <TableSkeleton />}
           {!isLoading && error && (
-            <ErrorState title="Unable to load project data." description={error} onRetry={fetchProjects} />
+            <ErrorState
+              title="Unable to load project data."
+              description={error}
+              onRetry={fetchProjects}
+            />
           )}
           {!isLoading && !error && recentProjects.length === 0 && (
             <EmptyState
@@ -199,7 +226,9 @@ export function DashboardPage() {
               onAction={() => setCreateOpen(true)}
             />
           )}
-          {!isLoading && !error && recentProjects.length > 0 && <ProjectTable projects={recentProjects} />}
+          {!isLoading && !error && recentProjects.length > 0 && (
+            <ProjectTable projects={recentProjects} />
+          )}
         </div>
       </div>
 

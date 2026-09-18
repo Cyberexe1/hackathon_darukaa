@@ -121,7 +121,10 @@ export function TopNavbar({ pageTitle, onOpenMobileSidebar }: TopNavbarProps) {
               notifications
             </span>
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1.5 w-2 h-2 rounded-full bg-error" aria-hidden="true" />
+              <span
+                className="absolute top-1 right-1.5 w-2 h-2 rounded-full bg-error"
+                aria-hidden="true"
+              />
             )}
           </button>
           {notifOpen && (
@@ -130,16 +133,25 @@ export function TopNavbar({ pageTitle, onOpenMobileSidebar }: TopNavbarProps) {
               role="menu"
             >
               <div className="px-space-md py-space-sm border-b border-outline-variant/30 flex items-center justify-between">
-                <span className="font-headline-sm text-headline-sm text-primary">Notifications</span>
+                <span className="font-headline-sm text-headline-sm text-primary">
+                  Notifications
+                </span>
                 {unreadCount > 0 && (
-                  <span className="font-label-technical text-label-micro text-surface-tint">{unreadCount} new</span>
+                  <span className="font-label-technical text-label-micro text-surface-tint">
+                    {unreadCount} new
+                  </span>
                 )}
               </div>
               <ul className="max-h-80 overflow-y-auto divide-y divide-outline-variant/20">
                 {mockNotifications.map((notif) => (
-                  <li key={notif.id} className="px-space-md py-space-sm hover:bg-surface-container-low transition-colors">
+                  <li
+                    key={notif.id}
+                    className="px-space-md py-space-sm hover:bg-surface-container-low transition-colors"
+                  >
                     <div className="flex items-start gap-space-sm">
-                      {!notif.read && <span className="w-1.5 h-1.5 rounded-full bg-surface-tint mt-1.5 shrink-0" />}
+                      {!notif.read && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-surface-tint mt-1.5 shrink-0" />
+                      )}
                       <div className={notif.read ? 'pl-3.5' : ''}>
                         <p className="font-body-sm text-body-sm text-on-surface">{notif.message}</p>
                         <span className="font-label-technical text-label-micro text-on-surface-variant">
@@ -169,7 +181,10 @@ export function TopNavbar({ pageTitle, onOpenMobileSidebar }: TopNavbarProps) {
             <span className="hidden md:inline font-body-sm text-body-sm text-on-surface max-w-[140px] truncate">
               {displayName}
             </span>
-            <span className="material-symbols-outlined text-[18px] text-on-surface-variant hidden md:inline" aria-hidden="true">
+            <span
+              className="material-symbols-outlined text-[18px] text-on-surface-variant hidden md:inline"
+              aria-hidden="true"
+            >
               expand_more
             </span>
           </button>
@@ -179,7 +194,9 @@ export function TopNavbar({ pageTitle, onOpenMobileSidebar }: TopNavbarProps) {
               role="menu"
             >
               <div className="px-space-md py-space-sm border-b border-outline-variant/30">
-                <p className="font-body-sm text-body-sm text-on-surface font-medium truncate">{displayName}</p>
+                <p className="font-body-sm text-body-sm text-on-surface font-medium truncate">
+                  {displayName}
+                </p>
                 <p className="font-label-technical text-label-micro text-on-surface-variant truncate">
                   {user?.email ?? 'demo@darukaa.earth'}
                 </p>
@@ -190,7 +207,9 @@ export function TopNavbar({ pageTitle, onOpenMobileSidebar }: TopNavbarProps) {
                 className="w-full flex items-center gap-space-sm px-space-md py-space-sm font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
                 role="menuitem"
               >
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">person</span>
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  person
+                </span>
                 Profile
               </button>
               <button
@@ -202,7 +221,9 @@ export function TopNavbar({ pageTitle, onOpenMobileSidebar }: TopNavbarProps) {
                 className="w-full flex items-center gap-space-sm px-space-md py-space-sm font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-low hover:text-primary transition-colors"
                 role="menuitem"
               >
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">settings</span>
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  settings
+                </span>
                 Settings
               </button>
               <button
@@ -211,7 +232,9 @@ export function TopNavbar({ pageTitle, onOpenMobileSidebar }: TopNavbarProps) {
                 className="w-full flex items-center gap-space-sm px-space-md py-space-sm font-body-sm text-body-sm text-error hover:bg-error-container/40 transition-colors border-t border-outline-variant/20"
                 role="menuitem"
               >
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">logout</span>
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  logout
+                </span>
                 Logout
               </button>
             </div>

@@ -1,0 +1,14 @@
+{
+  "name": "darukaa-earth",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Root tooling config for the Darukaa.Earth monorepo (frontend/ + backend/) — Husky + lint-staged pre-commit hooks only. Each subproject keeps its own dependencies/scripts.",
+  "type": "module",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "9.1.7",
+    "lint-staged": "15.5.2"
+  }
+}

@@ -35,7 +35,11 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
-      <div className="absolute inset-0 bg-primary/30 backdrop-blur-sm animate-fade-in" onClick={onClose} aria-hidden="true" />
+      <div
+        className="absolute inset-0 bg-primary/30 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+        aria-hidden="true"
+      />
       <aside
         role="dialog"
         aria-modal="true"
@@ -43,7 +47,9 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
         className="relative w-full sm:w-[420px] h-full bg-surface-container-lowest shadow-xl overflow-y-auto animate-slide-in-right"
       >
         <div className="flex items-center justify-between px-space-lg py-space-md border-b border-outline-variant/30 sticky top-0 bg-surface-container-lowest">
-          <span className="font-label-technical text-label-technical text-on-surface-variant uppercase">Site Details</span>
+          <span className="font-label-technical text-label-technical text-on-surface-variant uppercase">
+            Site Details
+          </span>
           <button
             type="button"
             onClick={onClose}
@@ -68,30 +74,50 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
             </div>
 
             <h2 className="font-headline-lg text-headline-lg text-primary mb-1">{site.name}</h2>
-            <p className="font-body-sm text-body-sm text-on-surface-variant mb-space-lg">{site.description}</p>
+            <p className="font-body-sm text-body-sm text-on-surface-variant mb-space-lg">
+              {site.description}
+            </p>
 
             <div className="space-y-space-sm mb-space-lg">
               <div className="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg">
-                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">Project</span>
+                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
+                  Project
+                </span>
                 <span className="font-body-sm text-body-sm text-primary font-medium truncate max-w-[220px]">
                   {project?.name ?? '—'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg">
-                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">Area</span>
-                <span className="font-headline-sm text-headline-sm text-primary">{site.area_hectares.toLocaleString()} ha</span>
+                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
+                  Area
+                </span>
+                <span className="font-headline-sm text-headline-sm text-primary">
+                  {site.area_hectares.toLocaleString()} ha
+                </span>
               </div>
               <div className="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg">
-                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">Perimeter</span>
-                <span className="font-headline-sm text-headline-sm text-primary">{site.perimeter_km.toLocaleString()} km</span>
+                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
+                  Perimeter
+                </span>
+                <span className="font-headline-sm text-headline-sm text-primary">
+                  {site.perimeter_km.toLocaleString()} km
+                </span>
               </div>
               <div className="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg">
-                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">Carbon Impact</span>
-                <span className="font-headline-sm text-headline-sm text-on-surface-variant">No monitoring data</span>
+                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
+                  Carbon Impact
+                </span>
+                <span className="font-headline-sm text-headline-sm text-on-surface-variant">
+                  No monitoring data
+                </span>
               </div>
               <div className="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg">
-                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">Biodiversity</span>
-                <span className="font-headline-sm text-headline-sm text-on-surface-variant">No monitoring data</span>
+                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
+                  Biodiversity
+                </span>
+                <span className="font-headline-sm text-headline-sm text-on-surface-variant">
+                  No monitoring data
+                </span>
               </div>
             </div>
 
@@ -101,7 +127,9 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
                 onClick={() => navigate(`/sites/${site.id}`)}
                 className="w-full bg-primary-container text-on-primary py-space-sm rounded-lg font-headline-sm text-body-sm flex items-center justify-center gap-2 hover:bg-primary transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">query_stats</span>
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  query_stats
+                </span>
                 View Analytics
               </button>
               <button
@@ -109,7 +137,9 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
                 onClick={() => navigate('/sites')}
                 className="w-full bg-surface-container text-primary py-space-sm rounded-lg font-headline-sm text-body-sm flex items-center justify-center gap-2 hover:bg-surface-container-high transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                  edit
+                </span>
                 Edit Site
               </button>
             </div>

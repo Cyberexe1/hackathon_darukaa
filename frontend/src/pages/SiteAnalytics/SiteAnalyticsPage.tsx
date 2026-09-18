@@ -72,7 +72,10 @@ export function SiteAnalyticsPage() {
         if (!cancelled) setFetchedSite(s);
       })
       .catch((err) => {
-        if (!cancelled) setSiteError(getApiErrorMessage(err, 'This site may have been removed or the link is incorrect.'));
+        if (!cancelled)
+          setSiteError(
+            getApiErrorMessage(err, 'This site may have been removed or the link is incorrect.'),
+          );
       })
       .finally(() => {
         if (!cancelled) setIsFetchingSite(false);
@@ -119,9 +122,18 @@ export function SiteAnalyticsPage() {
   const chartData = useMemo(
     () => ({
       carbon: filteredHistorical.map((m) => ({ label: m.recorded_at, value: m.carbon_tco2e })),
-      biodiversity: filteredHistorical.map((m) => ({ label: m.recorded_at, value: m.biodiversity_score })),
-      vegetation: filteredHistorical.map((m) => ({ label: m.recorded_at, value: m.vegetation_index })),
-      treeCover: filteredHistorical.map((m) => ({ label: m.recorded_at, value: m.tree_cover_percentage })),
+      biodiversity: filteredHistorical.map((m) => ({
+        label: m.recorded_at,
+        value: m.biodiversity_score,
+      })),
+      vegetation: filteredHistorical.map((m) => ({
+        label: m.recorded_at,
+        value: m.vegetation_index,
+      })),
+      treeCover: filteredHistorical.map((m) => ({
+        label: m.recorded_at,
+        value: m.tree_cover_percentage,
+      })),
     }),
     [filteredHistorical],
   );
@@ -184,10 +196,17 @@ export function SiteAnalyticsPage() {
   return (
     <DashboardLayout pageTitle={site.name}>
       <div className="p-4 md:p-space-lg max-w-[1600px] mx-auto flex flex-col gap-space-lg">
-        <nav aria-label="Breadcrumb" className="font-label-technical text-label-micro text-on-surface-variant">
-          <Link to="/dashboard" className="hover:text-primary">Dashboard</Link>
+        <nav
+          aria-label="Breadcrumb"
+          className="font-label-technical text-label-micro text-on-surface-variant"
+        >
+          <Link to="/dashboard" className="hover:text-primary">
+            Dashboard
+          </Link>
           <span className="mx-1">/</span>
-          <Link to="/sites" className="hover:text-primary">Sites</Link>
+          <Link to="/sites" className="hover:text-primary">
+            Sites
+          </Link>
           <span className="mx-1">/</span>
           <span className="text-primary">{site.name}</span>
         </nav>
@@ -197,7 +216,9 @@ export function SiteAnalyticsPage() {
           <StatusBadge status={site.status} />
         </div>
         {site.description && (
-          <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl -mt-space-sm">{site.description}</p>
+          <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl -mt-space-sm">
+            {site.description}
+          </p>
         )}
         {project && (
           <p className="font-label-technical text-label-micro text-on-surface-variant -mt-space-sm">
@@ -211,16 +232,26 @@ export function SiteAnalyticsPage() {
         {/* Summary cards */}
         {isLoadingAnalytics ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-gutter">
-            {Array.from({ length: 5 }).map((_, i) => <KpiCardSkeleton key={i} />)}
+            {Array.from({ length: 5 }).map((_, i) => (
+              <KpiCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-gutter">
-            <KpiCard icon="satellite_alt" label="Area" target={site.area_hectares} suffix=" ha" formatValue={(v) => v.toLocaleString()} />
+            <KpiCard
+              icon="satellite_alt"
+              label="Area"
+              target={site.area_hectares}
+              suffix=" ha"
+              formatValue={(v) => v.toLocaleString()}
+            />
             <KpiCard
               icon="co2"
               label="Carbon Impact"
               target={analytics?.summary.carbon_total ?? undefined}
-              staticValue={analytics?.summary.carbon_total == null ? 'No data available' : undefined}
+              staticValue={
+                analytics?.summary.carbon_total == null ? 'No data available' : undefined
+              }
               suffix={analytics?.summary.carbon_total != null ? ' tCO\u2082e' : undefined}
               formatValue={(v) => v.toLocaleString()}
               tone="accent"
@@ -229,7 +260,9 @@ export function SiteAnalyticsPage() {
               icon="eco"
               label="Biodiversity"
               target={analytics?.summary.biodiversity_current ?? undefined}
-              staticValue={analytics?.summary.biodiversity_current == null ? 'No data available' : undefined}
+              staticValue={
+                analytics?.summary.biodiversity_current == null ? 'No data available' : undefined
+              }
               suffix={analytics?.summary.biodiversity_current != null ? ' / 100' : undefined}
             />
             <KpiCard
@@ -245,7 +278,9 @@ export function SiteAnalyticsPage() {
               icon="forest"
               label="Tree Cover"
               target={analytics?.summary.tree_cover_current ?? undefined}
-              staticValue={analytics?.summary.tree_cover_current == null ? 'No data available' : undefined}
+              staticValue={
+                analytics?.summary.tree_cover_current == null ? 'No data available' : undefined
+              }
               suffix={analytics?.summary.tree_cover_current != null ? '%' : undefined}
             />
           </div>
@@ -253,7 +288,9 @@ export function SiteAnalyticsPage() {
 
         {/* Site boundary map */}
         <div className="bg-surface-container-lowest rounded-2xl shadow-sm p-space-sm md:p-space-md">
-          <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm px-space-sm">Site Boundary</h3>
+          <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm px-space-sm">
+            Site Boundary
+          </h3>
           <MapView
             sites={[site]}
             selectedSiteId={site.id}
@@ -266,7 +303,9 @@ export function SiteAnalyticsPage() {
 
         {/* Environmental analytics */}
         <div className="flex items-center justify-between flex-wrap gap-space-sm">
-          <h3 className="font-headline-sm text-headline-sm text-primary">Historical Environmental Performance</h3>
+          <h3 className="font-headline-sm text-headline-sm text-primary">
+            Historical Environmental Performance
+          </h3>
           <div className="flex items-center gap-space-md flex-wrap">
             {hasMetrics && <TimeRangeFilter value={timeRange} onChange={setTimeRange} />}
             <button
@@ -274,7 +313,9 @@ export function SiteAnalyticsPage() {
               onClick={() => setAddOpen(true)}
               className="inline-flex items-center gap-space-sm bg-primary-container text-on-primary px-space-md py-space-xs rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:bg-primary"
             >
-              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                add
+              </span>
               Add Measurement
             </button>
           </div>
@@ -290,7 +331,11 @@ export function SiteAnalyticsPage() {
         )}
 
         {!isLoadingAnalytics && analyticsError && (
-          <ErrorState title="Unable to load environmental analytics." description={analyticsError} onRetry={loadAnalytics} />
+          <ErrorState
+            title="Unable to load environmental analytics."
+            description={analyticsError}
+            onRetry={loadAnalytics}
+          />
         )}
 
         {!isLoadingAnalytics && !analyticsError && !hasMetrics && (
@@ -312,32 +357,64 @@ export function SiteAnalyticsPage() {
               <TreeCoverChart data={chartData.treeCover} />
             </div>
 
-            {analytics && <PerformanceSummaryCard performance={analytics.performance} summary={analytics.summary} />}
+            {analytics && (
+              <PerformanceSummaryCard
+                performance={analytics.performance}
+                summary={analytics.summary}
+              />
+            )}
 
             {/* Measurement records — edit/delete */}
             <div>
-              <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm">Measurement Records</h3>
+              <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm">
+                Measurement Records
+              </h3>
               <div className="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-surface-container-low font-label-technical text-label-micro text-on-surface-variant uppercase">
-                        <th scope="col" className="py-space-sm px-space-lg">Date</th>
-                        <th scope="col" className="py-space-sm px-space-md">Carbon</th>
-                        <th scope="col" className="py-space-sm px-space-md">Biodiversity</th>
-                        <th scope="col" className="py-space-sm px-space-md">Vegetation</th>
-                        <th scope="col" className="py-space-sm px-space-md">Tree Cover</th>
-                        <th scope="col" className="py-space-sm px-space-lg text-right">Actions</th>
+                        <th scope="col" className="py-space-sm px-space-lg">
+                          Date
+                        </th>
+                        <th scope="col" className="py-space-sm px-space-md">
+                          Carbon
+                        </th>
+                        <th scope="col" className="py-space-sm px-space-md">
+                          Biodiversity
+                        </th>
+                        <th scope="col" className="py-space-sm px-space-md">
+                          Vegetation
+                        </th>
+                        <th scope="col" className="py-space-sm px-space-md">
+                          Tree Cover
+                        </th>
+                        <th scope="col" className="py-space-sm px-space-lg text-right">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-outline-variant/20 font-body-sm text-body-sm">
                       {analytics?.historical.map((metric) => (
-                        <tr key={metric.id} className="hover:bg-surface-container-low/50 transition-colors">
-                          <td className="py-space-sm px-space-lg text-on-surface">{metric.recorded_at}</td>
-                          <td className="py-space-sm px-space-md text-primary font-medium">{metric.carbon_tco2e.toLocaleString()} tCO{'\u2082'}e</td>
-                          <td className="py-space-sm px-space-md text-on-surface">{metric.biodiversity_score} / 100</td>
-                          <td className="py-space-sm px-space-md text-on-surface">{metric.vegetation_index.toFixed(2)}</td>
-                          <td className="py-space-sm px-space-md text-on-surface">{metric.tree_cover_percentage}%</td>
+                        <tr
+                          key={metric.id}
+                          className="hover:bg-surface-container-low/50 transition-colors"
+                        >
+                          <td className="py-space-sm px-space-lg text-on-surface">
+                            {metric.recorded_at}
+                          </td>
+                          <td className="py-space-sm px-space-md text-primary font-medium">
+                            {metric.carbon_tco2e.toLocaleString()} tCO{'\u2082'}e
+                          </td>
+                          <td className="py-space-sm px-space-md text-on-surface">
+                            {metric.biodiversity_score} / 100
+                          </td>
+                          <td className="py-space-sm px-space-md text-on-surface">
+                            {metric.vegetation_index.toFixed(2)}
+                          </td>
+                          <td className="py-space-sm px-space-md text-on-surface">
+                            {metric.tree_cover_percentage}%
+                          </td>
                           <td className="py-space-sm px-space-lg text-right whitespace-nowrap">
                             <button
                               type="button"
@@ -369,9 +446,17 @@ export function SiteAnalyticsPage() {
         <MetricForm onSubmit={handleCreateMetric} onCancel={() => setAddOpen(false)} />
       </Modal>
 
-      <Modal isOpen={Boolean(editingMetric)} onClose={() => setEditingMetric(null)} title="Edit Measurement">
+      <Modal
+        isOpen={Boolean(editingMetric)}
+        onClose={() => setEditingMetric(null)}
+        title="Edit Measurement"
+      >
         {editingMetric && (
-          <MetricForm initial={editingMetric} onSubmit={handleUpdateMetric} onCancel={() => setEditingMetric(null)} />
+          <MetricForm
+            initial={editingMetric}
+            onSubmit={handleUpdateMetric}
+            onCancel={() => setEditingMetric(null)}
+          />
         )}
       </Modal>
 
