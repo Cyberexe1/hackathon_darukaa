@@ -321,7 +321,14 @@ export function DrawMap({ onPolygonChange, className = '', initialFeature = null
         </div>
       )}
       {isLoaded && (
-        <div className="absolute top-3 left-3 z-10 flex flex-col gap-space-sm max-w-[280px]">
+        // Positioned top-right, below Mapbox's own zoom (+/-) and trash
+        // controls (also top-right, added above via `addControl`) —
+        // `top-36` (144px) clears that native control stack's height
+        // instead of overlapping it. Fixed `w-[260px]` (rather than
+        // `max-w-*` on a now-right-anchored container) keeps the
+        // textarea/buttons inside sized predictably instead of
+        // shrink-wrapping to content.
+        <div className="absolute top-36 right-3 z-10 flex flex-col gap-space-sm w-[260px]">
           <div className="flex gap-space-sm">
             <button
               type="button"
