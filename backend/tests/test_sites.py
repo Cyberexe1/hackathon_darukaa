@@ -3,7 +3,9 @@ retrieval, and ownership authorization.
 """
 
 from fastapi.testclient import TestClient
+from sqlalchemy import text
 
+from app.db.session import SessionLocal
 from tests.conftest import VALID_POLYGON, make_project_payload, make_site_payload
 
 
@@ -199,9 +201,6 @@ def test_delete_site_success(client: TestClient, auth_headers):
 # --- Additional coverage: coordinate-range validation, direct PostGIS
 # storage verification, update-recalculation, delete/project isolation,
 # and unauthorized update/delete. ---
-
-from app.db.session import SessionLocal  # noqa: E402
-from sqlalchemy import text  # noqa: E402
 
 
 def test_create_site_rejects_out_of_range_longitude(client: TestClient, auth_headers):

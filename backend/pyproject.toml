@@ -9,6 +9,18 @@ line-length = 120
 target-version = "py313"
 exclude = [".venv", "alembic/versions"]
 
+[tool.ruff.lint.isort]
+# Explicitly pins `app` as first-party. Without this, isort's
+# first/third-party classification of `app.*` imports is inferred from
+# the invocation directory: CI (.github/workflows/backend-ci.yml) always
+# runs with `working-directory: backend`, but the repo-root lint-staged
+# hook invokes ruff from the monorepo root with `--config
+# backend/pyproject.toml` — that mismatch made ruff alternate between two
+# different "correct" import orderings for the same file depending on
+# which one last touched it, and `src = ["."]` alone wasn't sufficient to
+# fix it (it's relative to the invocation directory too).
+known-first-party = ["app", "tests"]
+
 [tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors
