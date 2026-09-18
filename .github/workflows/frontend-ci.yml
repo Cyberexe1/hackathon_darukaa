@@ -16,8 +16,8 @@ defaults:
     working-directory: frontend
 
 jobs:
-  lint-build:
-    name: Lint, format check, build
+  lint-test-build:
+    name: Lint, format check, test, build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,6 +38,9 @@ jobs:
 
       - name: Check formatting
         run: npm run format:check
+
+      - name: Test
+        run: npm run test
 
       - name: Build
         run: npm run build

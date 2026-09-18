@@ -9,7 +9,13 @@ import { MapSkeleton } from '../LoadingSkeleton/LoadingSkeleton';
 import { AnalyticsMapLegend } from './AnalyticsMapLegend';
 import { ANALYTICS_MODE_COLORS } from './analyticsMapColors';
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
+// `VITE_MAPBOX_ACCESS_TOKEN` is the canonical name (matches the hackathon
+// spec/deployment docs); `VITE_MAPBOX_TOKEN` is accepted as a
+// backward-compatible alias for existing local .env files. This is a
+// PUBLIC Mapbox token, safe to bundle into the browser build — it is
+// never sent to or stored by the backend.
+const MAPBOX_TOKEN = (import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ??
+  import.meta.env.VITE_MAPBOX_TOKEN) as string | undefined;
 
 interface MapViewProps {
   sites: Site[];

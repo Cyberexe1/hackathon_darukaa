@@ -6,8 +6,9 @@ Neon PostgreSQL connection string and JWT secret must be supplied via env.
 
 Never exposed to the frontend: DATABASE_URL, JWT_SECRET_KEY, and any other
 value in this file. The frontend only ever receives VITE_-prefixed build
-time variables (VITE_API_URL, VITE_MAPBOX_TOKEN), which are a completely
-separate config surface in frontend/.env* — see frontend/README.md.
+time variables (VITE_API_URL, VITE_MAPBOX_ACCESS_TOKEN — a PUBLIC Mapbox
+token, not a backend secret), which are a completely separate config
+surface in frontend/.env* — see frontend/README.md.
 """
 
 from pydantic import AliasChoices, Field

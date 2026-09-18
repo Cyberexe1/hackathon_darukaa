@@ -19,6 +19,13 @@ export interface UpdateSiteInput {
   geometry?: GeoJSONPolygon;
 }
 
+/** Aliases matching the hackathon spec's naming exactly
+ * (`CreateSiteRequest` / `SiteResponse`), without duplicating the
+ * underlying shape — `CreateSiteInput`/`Site` remain the canonical types
+ * used throughout the rest of this codebase (stores, components). */
+export type CreateSiteRequest = CreateSiteInput;
+export type SiteResponse = Site;
+
 // Real Axios-backed site service. `createSite` posts the Mapbox Draw
 // GeoJSON polygon straight through to FastAPI, which validates it and
 // persists it as a PostGIS geometry column (see

@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Site } from '../../types/dashboard';
+import type { Site, SiteAnalyticsSummary } from '../../types/dashboard';
 import { StatusBadge } from '../StatusBadge/StatusBadge';
 import { useProjectStore } from '../../store/projectStore';
+import { analyticsService } from '../../services/analyticsService';
 import { SitePanelSkeleton } from '../LoadingSkeleton/LoadingSkeleton';
 
 interface SiteDetailsPanelProps {
@@ -19,6 +20,7 @@ interface SiteDetailsPanelProps {
 export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelProps) {
   const navigate = useNavigate();
   const getProjectById = useProjectStore((state) => state.getProjectById);
+  const [metricsSummary, setMetricsSummary] = useState<SiteAnalyticsSummary | null>(null);
 
   useEffect(() => {
     if (!site && !isLoading) return;
@@ -28,6 +30,33 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [site, isLoading, onClose]);
+
+  // Fetch the site's environmental metrics summary (if any exist) whenever
+  // the selected site changes, so the panel shows real recorded values
+  // instead of always claiming "No monitoring data".
+  useEffect(() => {
+    if (!site) return;
+    // Clear any previous site's figures immediately so we never briefly
+    // show stale metrics while the new fetch below is in flight — this
+    // is synchronizing local state with an external system (the API),
+    // not deriving it from props/state that could be computed during
+    // render instead.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMetricsSummary(null);
+    let cancelled = false;
+    analyticsService
+      .getSiteAnalytics(site.id)
+      .then((data) => {
+        if (!cancelled) setMetricsSummary(data.summary);
+      })
+      .catch(() => {
+        // Non-fatal — the panel simply falls back to "No monitoring data".
+        if (!cancelled) setMetricsSummary(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [site]);
 
   if (!site && !isLoading) return null;
 
@@ -105,10 +134,20 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
               </div>
               <div className="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg">
                 <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
+                  Centroid
+                </span>
+                <span className="font-body-sm text-body-sm text-primary font-medium">
+                  {site.centroid.lat.toFixed(4)}, {site.centroid.lon.toFixed(4)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg">
+                <span className="font-label-technical text-label-micro text-on-surface-variant uppercase">
                   Carbon Impact
                 </span>
                 <span className="font-headline-sm text-headline-sm text-on-surface-variant">
-                  No monitoring data
+                  {metricsSummary?.carbon_total != null
+                    ? `${metricsSummary.carbon_total.toLocaleString()} tCO\u2082e`
+                    : 'No monitoring data'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg">
@@ -116,7 +155,9 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
                   Biodiversity
                 </span>
                 <span className="font-headline-sm text-headline-sm text-on-surface-variant">
-                  No monitoring data
+                  {metricsSummary?.biodiversity_current != null
+                    ? `${metricsSummary.biodiversity_current} / 100`
+                    : 'No monitoring data'}
                 </span>
               </div>
             </div>
@@ -130,7 +171,7 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
                   query_stats
                 </span>
-                View Analytics
+                View Site Analytics
               </button>
               <button
                 type="button"
@@ -138,9 +179,9 @@ export function SiteDetailsPanel({ site, isLoading, onClose }: SiteDetailsPanelP
                 className="w-full bg-surface-container text-primary py-space-sm rounded-lg font-headline-sm text-body-sm flex items-center justify-center gap-2 hover:bg-surface-container-high transition-colors"
               >
                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                  edit
+                  list
                 </span>
-                Edit Site
+                View All Sites
               </button>
             </div>
           </div>

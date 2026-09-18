@@ -10,6 +10,16 @@ export interface GeoJSONPolygon {
   coordinates: number[][][];
 }
 
+/** A GeoJSON Point geometry — [longitude, latitude]. Not currently used
+ * for `Site.centroid` (which uses the more ergonomic `{ lat, lon }` shape
+ * consistently across this codebase's types/components/backend schema),
+ * but provided for any future API surface that returns a centroid/marker
+ * as standard GeoJSON. */
+export interface GeoJSONPoint {
+  type: 'Point';
+  coordinates: [number, number];
+}
+
 export type ProjectType =
   | 'Forest Restoration'
   | 'Mangrove'

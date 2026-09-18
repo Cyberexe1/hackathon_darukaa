@@ -46,6 +46,7 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
   const [summary, setSummary] = useState<GeometrySummary | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // The project picker must reflect projects actually persisted to the
   // backend (including ones just created via ProjectForm this session),
@@ -62,6 +63,7 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
     setPolygonFeature(null);
     setSummary(null);
     setSaveError(null);
+    setSaveSuccess(false);
   };
 
   const handleClose = () => {
@@ -97,7 +99,13 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
         status: 'In Review',
       });
       onCreated?.(created);
-      handleClose();
+      // Show a brief success state instead of closing immediately, so the
+      // user gets clear confirmation the site (and its boundary) actually
+      // persisted before the modal disappears.
+      setSaveSuccess(true);
+      setTimeout(() => {
+        handleClose();
+      }, 1400);
     } catch (error) {
       setSaveError(
         getApiErrorMessage(error, 'Unable to save the site boundary. Please try again.'),
@@ -264,6 +272,21 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
                 Saving site boundary…
               </p>
             </>
+          ) : saveSuccess ? (
+            <>
+              <span
+                className="material-symbols-outlined text-surface-tint text-[40px]"
+                aria-hidden="true"
+              >
+                check_circle
+              </span>
+              <p className="font-headline-sm text-headline-sm text-primary">
+                Site saved successfully!
+              </p>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                &ldquo;{siteName}&rdquo; is now visible on the project and dashboard maps.
+              </p>
+            </>
           ) : saveError ? (
             <>
               <span className="material-symbols-outlined text-error text-[32px]" aria-hidden="true">
@@ -287,50 +310,52 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
         </div>
       )}
 
-      <div className="flex items-center justify-between mt-space-lg pt-space-md border-t border-outline-variant/30">
-        <button
-          type="button"
-          onClick={step === 1 ? handleClose : goBack}
-          className="px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm text-on-surface-variant hover:bg-surface-container transition-colors"
-        >
-          {step === 1 ? 'Cancel' : 'Back'}
-        </button>
+      {!saveSuccess && (
+        <div className="flex items-center justify-between mt-space-lg pt-space-md border-t border-outline-variant/30">
+          <button
+            type="button"
+            onClick={step === 1 ? handleClose : goBack}
+            className="px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm text-on-surface-variant hover:bg-surface-container transition-colors"
+          >
+            {step === 1 ? 'Cancel' : 'Back'}
+          </button>
 
-        {step < 5 ? (
-          <button
-            type="button"
-            onClick={goNext}
-            disabled={!canProceed()}
-            className="inline-flex items-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              arrow_forward
-            </span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="inline-flex items-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {isSaving ? (
-              <span
-                className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin"
-                aria-hidden="true"
-              />
-            ) : (
-              <>
-                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-                  save
-                </span>
-                Save Site
-              </>
-            )}
-          </button>
-        )}
-      </div>
+          {step < 5 ? (
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={!canProceed()}
+              className="inline-flex items-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:bg-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                arrow_forward
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="inline-flex items-center gap-space-sm bg-primary-container text-on-primary px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm transition-all duration-200 hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isSaving ? (
+                <span
+                  className="w-4 h-4 rounded-full border-2 border-on-primary/40 border-t-on-primary animate-spin"
+                  aria-hidden="true"
+                />
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                    save
+                  </span>
+                  Save Site
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      )}
     </Modal>
   );
 }

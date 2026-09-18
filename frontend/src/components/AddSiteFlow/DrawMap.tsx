@@ -8,7 +8,13 @@ import { ErrorState } from '../ErrorState/ErrorState';
 import { MapSkeleton } from '../LoadingSkeleton/LoadingSkeleton';
 import { MAPBOX_STYLE_LIGHT } from '../MapView/mapStyle';
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
+// `VITE_MAPBOX_ACCESS_TOKEN` is the canonical name (matches the hackathon
+// spec/deployment docs); `VITE_MAPBOX_TOKEN` is accepted as a
+// backward-compatible alias for existing local .env files. This is a
+// PUBLIC Mapbox token, safe to bundle into the browser build — it is
+// never sent to or stored by the backend.
+const MAPBOX_TOKEN = (import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ??
+  import.meta.env.VITE_MAPBOX_TOKEN) as string | undefined;
 
 interface DrawMapProps {
   onPolygonChange: (feature: Feature<Polygon> | null) => void;
