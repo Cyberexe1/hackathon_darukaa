@@ -129,6 +129,13 @@ export function DrawMap({ onPolygonChange, className = '', initialFeature = null
     map.addControl(draw);
     drawRef.current = draw;
 
+    // Tracks the deferred "switch to direct_select" timeouts scheduled by
+    // `enforceSinglePolygon` below, so they can be cancelled on unmount
+    // (avoids calling into a Draw/map instance that's already been torn
+    // down if the component unmounts in the brief window before the
+    // timeout fires).
+    const pendingSelectTimeouts: ReturnType<typeof setTimeout>[] = [];
+
     const emitPolygon = () => {
       const data = draw.getAll();
       const polygonFeature = data.features.find((f) => f.geometry.type === 'Polygon') as
@@ -153,12 +160,30 @@ export function DrawMap({ onPolygonChange, className = '', initialFeature = null
       // just finished, so points are immediately draggable — the user
       // shouldn't have to click the polygon again just to start
       // adjusting it.
-      const finished = draw.getAll().features.find((f) => f.geometry.type === 'Polygon');
-      const finishedId = finished?.id;
-      if (finishedId !== undefined) {
-        draw.changeMode('direct_select', { featureId: String(finishedId) });
-        setDrawMode('direct_select');
-      }
+      //
+      // Deferred to the next tick deliberately: `draw.create` can fire
+      // *synchronously from inside* Mapbox GL Draw's own `changeMode()`
+      // call (this happens both when finishing via the "Finish" button
+      // and when clicking back onto the first vertex — both call
+      // `changeMode('simple_select', ...)`, whose internal
+      // `DrawPolygon.onStop` fires `draw.create` mid-transition).
+      // Calling `draw.changeMode()` again synchronously from within that
+      // same call stack re-enters Draw's non-reentrant mode state
+      // machine: it re-runs `onStop` a second time on the same polygon,
+      // silently removing an extra vertex — for a minimal 3-vertex
+      // polygon this drops it below the valid minimum and Draw quietly
+      // deletes the whole feature, which is exactly why "Finish"
+      // appeared to do nothing. Deferring with a macrotask lets the
+      // in-flight `changeMode` call return first.
+      const timeoutId = setTimeout(() => {
+        const finished = draw.getAll().features.find((f) => f.geometry.type === 'Polygon');
+        const finishedId = finished?.id;
+        if (finishedId !== undefined) {
+          draw.changeMode('direct_select', { featureId: String(finishedId) });
+          setDrawMode('direct_select');
+        }
+      }, 0);
+      pendingSelectTimeouts.push(timeoutId);
     };
 
     map.on('draw.create', enforceSinglePolygon);
@@ -180,6 +205,7 @@ export function DrawMap({ onPolygonChange, className = '', initialFeature = null
     mapRef.current = map;
 
     return () => {
+      pendingSelectTimeouts.forEach(clearTimeout);
       map.remove();
       mapRef.current = null;
       drawRef.current = null;
