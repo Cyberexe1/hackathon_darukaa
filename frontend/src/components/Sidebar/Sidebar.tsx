@@ -77,6 +77,19 @@ export function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onMobileClos
           collapsed ? 'w-[72px]' : 'w-64'
         }`}
       >
+        {/* Brand header — matches the mobile drawer's, aligned with
+            TopNavbar's own height (`h-16 md:h-20`) so the sidebar's top
+            edge lines up with it instead of the nav list sitting flush
+            against the very top of the page. */}
+        <div
+          className={`h-16 md:h-20 flex items-center border-b border-outline-variant/30 shrink-0 ${
+            collapsed ? 'justify-center px-space-sm' : 'px-space-md'
+          }`}
+        >
+          <span className="font-headline-sm text-headline-sm uppercase tracking-wider text-primary truncate">
+            {collapsed ? 'DE' : 'DARUKAA.EARTH'}
+          </span>
+        </div>
         <SidebarContent collapsed={collapsed} />
         <div className="p-space-sm border-t border-outline-variant/30">
           <button

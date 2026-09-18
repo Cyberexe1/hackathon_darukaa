@@ -8,18 +8,18 @@ interface AnalyticsCardProps {
 /** Compact aggregate stat card used on the global /analytics overview page. */
 export function AnalyticsCard({ label, value, icon, trend }: AnalyticsCardProps) {
   return (
-    <div className="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm">
-      <div className="flex items-center justify-between mb-space-sm">
-        <span className="font-label-technical text-label-technical text-on-surface-variant uppercase">
+    <div className="bg-surface-container-lowest p-space-lg rounded-2xl shadow-sm min-w-0">
+      <div className="flex items-center justify-between gap-space-sm mb-space-sm">
+        <span className="font-label-technical text-label-technical text-on-surface-variant uppercase truncate">
           {label}
         </span>
-        <div className="w-9 h-9 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+        <div className="w-9 h-9 rounded-lg bg-surface-container-high text-primary flex items-center justify-center shrink-0">
           <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
             {icon}
           </span>
         </div>
       </div>
-      <div className="font-headline-lg text-headline-lg text-primary leading-none mb-1">
+      <div className="font-headline-sm text-headline-sm md:font-headline-lg md:text-headline-lg text-primary leading-tight mb-1 break-words">
         {value}
       </div>
       {trend && (
