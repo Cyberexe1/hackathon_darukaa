@@ -50,7 +50,12 @@ class FakeMap {
     (this.handlers[event] ?? []).forEach((h) => h(...args));
   }
 
-  addControl() {
+  addControl(control?: { onAdd?: (map: unknown) => unknown }) {
+    // Real Mapbox GL calls `control.onAdd(map)` when a control (e.g.
+    // MapboxDraw) is added — some DrawMap tests need the fake draw
+    // instance to have captured a reference to this map so it can fire
+    // `draw.create`/etc events the same way DrawMap listens for them.
+    control?.onAdd?.(this);
     return this;
   }
 

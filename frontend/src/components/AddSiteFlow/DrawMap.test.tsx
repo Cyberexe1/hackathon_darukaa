@@ -132,4 +132,58 @@ describe('DrawMap', () => {
     expect(await screen.findByText('That is not valid JSON.')).toBeInTheDocument();
     expect(onPolygonChange).not.toHaveBeenCalled();
   });
+
+  it('clicking Finish on a minimal 3-vertex polygon does not silently delete it', async () => {
+    // Regression test for a reentrancy bug: @mapbox/mapbox-gl-draw fires
+    // `draw.create` *synchronously from inside* `changeMode('simple_select')`
+    // (via its own `DrawPolygon.onStop`). DrawMap's `draw.create` handler
+    // used to call `draw.changeMode('direct_select', ...)` again
+    // immediately, re-entering Draw's non-reentrant mode state machine
+    // mid-transition — which silently strips a vertex and, for a minimal
+    // 3-vertex ring, invalidates and deletes the whole polygon. Clicking
+    // "Finish" therefore appeared to do nothing. The fix defers that
+    // follow-up `changeMode` call with `setTimeout`.
+    const { onPolygonChange } = await renderLoaded();
+    const drawMock = await import('../../test/mocks/mapboxglDraw');
+    const draw = drawMock.getLastDrawInstance()!;
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: /draw points/i }));
+
+    // Real Mapbox GL Draw keeps one extra "currently tracked" vertex
+    // while drawing (updated on every mousemove) that `onStop` removes
+    // before validating. A finished minimal triangle therefore has 5
+    // ring positions in-progress: popping once yields the correct closed
+    // 4-point triangle (v0, v1, v2, v0); popping twice (the reentrancy
+    // bug) drops it to 3 — below the valid minimum — and the real
+    // library silently deletes it.
+    const minimalTriangleInProgress: import('geojson').Feature<import('geojson').Polygon> = {
+      type: 'Feature',
+      id: 'triangle-1',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [72.8, 19.1],
+            [72.81, 19.1],
+            [72.805, 19.11],
+            [72.8, 19.1],
+            [72.8, 19.1],
+          ],
+        ],
+      },
+    };
+    draw.__armPendingPolygon(minimalTriangleInProgress);
+
+    await user.click(screen.getByRole('button', { name: /finish/i }));
+
+    // The polygon must have actually been reported, not silently dropped.
+    await waitFor(() => {
+      expect(onPolygonChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'triangle-1' }),
+      );
+    });
+    expect(draw.getAll().features).toHaveLength(1);
+  });
 });
