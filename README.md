@@ -284,7 +284,7 @@ exist, it returns `404 Not Found` — the two are never conflated, so a
 ```powershell
 cd backend
 python -m venv .venv
-.\.venv\Scripts\pip install -r requirements-dev.txt
+.\.venv\Scripts\pip install -r requirements.txt
 Copy-Item .env.example .env
 # Edit .env: set DATABASE_URL to your Neon connection string and JWT_SECRET_KEY
 # to a random value: python -c "import secrets; print(secrets.token_urlsafe(64))"
@@ -351,7 +351,7 @@ even on downgrade.
 
 ```powershell
 cd backend
-.\.venv\Scripts\pip install -r requirements-dev.txt
+.\.venv\Scripts\pip install -r requirements.txt
 .\.venv\Scripts\python -m pytest -v
 ```
 

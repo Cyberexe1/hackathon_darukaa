@@ -152,7 +152,7 @@ server (e.g. `http://127.0.0.1:8000`).
 ## Run tests
 
 ```powershell
-.\.venv\Scripts\pip install -r requirements-dev.txt
+.\.venv\Scripts\pip install -r requirements.txt
 .\.venv\Scripts\python -m pytest tests/ -v
 ```
 
@@ -185,7 +185,7 @@ cross-user access denial (403) plus not-found handling (404).
 ## Linting
 
 ```powershell
-.\.venv\Scripts\pip install -r requirements-dev.txt
+.\.venv\Scripts\pip install -r requirements.txt
 .\.venv\Scripts\ruff check .
 .\.venv\Scripts\ruff format --check .
 ```
