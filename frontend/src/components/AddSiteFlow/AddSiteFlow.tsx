@@ -262,8 +262,8 @@ export function AddSiteFlow({
         <div className="flex flex-col gap-space-sm">
           <p className="font-body-sm text-body-sm text-on-surface-variant">
             {isEditMode
-              ? 'Adjust the site boundary, draw a new one, or import a GeoJSON polygon. Nothing is saved until you confirm on the final step.'
-              : 'Draw the site boundary directly on the map, or import an existing GeoJSON polygon.'}
+              ? 'Adjust the site boundary or draw a new one. Nothing is saved until you confirm on the final step.'
+              : 'Draw the site boundary directly on the map.'}
           </p>
           <DrawMap
             onPolygonChange={handlePolygonChange}

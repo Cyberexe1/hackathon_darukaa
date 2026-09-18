@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // `mapbox-gl` requires a real WebGL context, unavailable in jsdom.
@@ -10,24 +10,11 @@ vi.mock('mapbox-gl', async () => {
 
 // `@mapbox/mapbox-gl-draw` is mocked with a fake that supports the
 // add/deleteAll/changeMode/getAll subset DrawMap actually calls — this
-// lets the "Import Polygon" and "Draw Points" buttons be exercised
-// without a real Mapbox GL Draw canvas/mouse interaction.
+// lets the "Draw Points" button be exercised without a real Mapbox GL
+// Draw canvas/mouse interaction.
 vi.mock('@mapbox/mapbox-gl-draw', async () => {
   const mod = await import('../../test/mocks/mapboxglDraw');
   return { default: mod.default };
-});
-
-const VALID_POLYGON_GEOJSON = JSON.stringify({
-  type: 'Polygon',
-  coordinates: [
-    [
-      [72.8, 19.1],
-      [72.81, 19.1],
-      [72.81, 19.11],
-      [72.8, 19.11],
-      [72.8, 19.1],
-    ],
-  ],
 });
 
 describe('DrawMap', () => {
@@ -56,7 +43,7 @@ describe('DrawMap', () => {
     });
     mapboxglMock.getLastMapInstance()!.fire('load');
 
-    await screen.findByRole('button', { name: /import polygon/i });
+    await screen.findByRole('button', { name: /draw points/i });
     return { onPolygonChange };
   }
 
@@ -70,10 +57,9 @@ describe('DrawMap', () => {
     expect(await screen.findByText(/Map could not be loaded/i)).toBeInTheDocument();
   });
 
-  it('renders "Import Polygon" and "Draw Points" buttons once the map loads', async () => {
+  it('renders the "Draw Points" button once the map loads', async () => {
     await renderLoaded();
 
-    expect(screen.getByRole('button', { name: /import polygon/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /draw points/i })).toBeInTheDocument();
   });
 
@@ -90,47 +76,6 @@ describe('DrawMap', () => {
       'aria-pressed',
       'true',
     );
-  });
-
-  it('imports a pasted GeoJSON polygon and reports it via onPolygonChange', async () => {
-    const { onPolygonChange } = await renderLoaded();
-
-    const user = userEvent.setup();
-    await user.click(screen.getByRole('button', { name: /import polygon/i }));
-
-    // Pasting raw GeoJSON via `fireEvent.change` — `user.type` interprets
-    // `{`/`}` as special key syntax (e.g. `{enter}`), unsuitable for
-    // typing literal JSON braces.
-    const textarea = await screen.findByPlaceholderText(/"type":"Polygon"/i);
-    fireEvent.change(textarea, { target: { value: VALID_POLYGON_GEOJSON } });
-    await user.click(screen.getByRole('button', { name: /use polygon/i }));
-
-    await waitFor(() => {
-      expect(onPolygonChange).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'Feature',
-          geometry: expect.objectContaining({ type: 'Polygon' }),
-        }),
-      );
-    });
-    // Import panel closes on success.
-    expect(screen.queryByRole('button', { name: /use polygon/i })).not.toBeInTheDocument();
-  });
-
-  it('shows an inline error and does not call onPolygonChange for invalid GeoJSON', async () => {
-    const { onPolygonChange } = await renderLoaded();
-
-    const user = userEvent.setup();
-    await user.click(screen.getByRole('button', { name: /import polygon/i }));
-    const textarea = await screen.findByPlaceholderText(/"type":"Polygon"/i);
-    fireEvent.change(textarea, { target: { value: '{ not valid json' } });
-    await user.click(screen.getByRole('button', { name: /use polygon/i }));
-
-    // The textarea itself contains the literal text "not valid json" (the
-    // pasted input), so match the error message exactly via its leading
-    // capital "That" to avoid ambiguity with `findByText`.
-    expect(await screen.findByText('That is not valid JSON.')).toBeInTheDocument();
-    expect(onPolygonChange).not.toHaveBeenCalled();
   });
 
   it('clicking Finish on a minimal 3-vertex polygon does not silently delete it', async () => {

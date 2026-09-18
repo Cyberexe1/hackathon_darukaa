@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { SiteAnalyticsPage } from './SiteAnalyticsPage';
@@ -270,12 +270,25 @@ describe('SiteAnalyticsPage', () => {
     const user = userEvent.setup();
     renderPage();
 
-    expect(
-      (await screen.findAllByText(/Unable to load environmental analytics/i)).length,
-    ).toBeGreaterThan(0);
+    // Scoped to this specific error card via its heading, rather than a
+    // bare `getByRole('button', { name: /retry/i })` — "Retry" isn't a
+    // uniquely-identifying name on this page (a second, independent
+    // ErrorState card is possible for the site itself failing to load).
+    // The card's title/description also happen to render identical text
+    // here (the mocked rejection is a plain `Error`, so
+    // `getApiErrorMessage` falls back to the same string used as the
+    // `ErrorState` title) — querying by heading role specifically avoids
+    // matching both the `<h3>` title and the `<p>` description at once.
+    const analyticsErrorHeading = await screen.findByRole('heading', {
+      name: /Unable to load environmental analytics/i,
+    });
+    const analyticsErrorCard = analyticsErrorHeading.closest('div');
+    expect(analyticsErrorCard).not.toBeNull();
 
     mockGetSiteAnalytics.mockResolvedValueOnce(makeAnalytics());
-    await user.click(screen.getByRole('button', { name: /retry/i }));
+    await user.click(
+      within(analyticsErrorCard as HTMLElement).getByRole('button', { name: /retry/i }),
+    );
 
     await waitFor(() => expect(screen.getByText(/205.4/)).toBeInTheDocument());
   });
