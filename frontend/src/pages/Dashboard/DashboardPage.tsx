@@ -9,7 +9,11 @@ import { Modal } from '../../components/Modal/Modal';
 import { ProjectForm } from '../../components/ProjectForm/ProjectForm';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
-import { TableSkeleton, KpiCardSkeleton } from '../../components/LoadingSkeleton/LoadingSkeleton';
+import {
+  TableSkeleton,
+  KpiCardSkeleton,
+  MapSkeleton,
+} from '../../components/LoadingSkeleton/LoadingSkeleton';
 import { useProjectStore } from '../../store/projectStore';
 import { useMapStore } from '../../store/mapStore';
 import { useSiteStore } from '../../store/siteStore';
@@ -28,7 +32,13 @@ import type { DashboardAnalyticsResponse } from '../../types/dashboard';
 export function DashboardPage() {
   const navigate = useNavigate();
   const { projects, isLoading, error, fetchProjects } = useProjectStore();
-  const { sites, fetchSites, getSiteById } = useSiteStore();
+  const {
+    sites,
+    fetchSites,
+    getSiteById,
+    isLoading: isLoadingSites,
+    error: sitesError,
+  } = useSiteStore();
   const selectedSiteId = useMapStore((state) => state.selectedSiteId);
   const setSelectedSiteId = useMapStore((state) => state.setSelectedSiteId);
   const [createOpen, setCreateOpen] = useState(false);
@@ -187,13 +197,34 @@ export function DashboardPage() {
               {sites.length} {sites.length === 1 ? 'site' : 'sites'}
             </span>
           </div>
-          <MapView
-            sites={sites}
-            selectedSiteId={selectedSiteId}
-            onSiteSelect={setSelectedSiteId}
-            className="h-[380px] md:h-[480px]"
-            initialZoom={2.2}
-          />
+          {isLoadingSites ? (
+            <div className="h-[380px] md:h-[480px]">
+              <MapSkeleton />
+            </div>
+          ) : sitesError ? (
+            <ErrorState
+              title="Unable to load sites."
+              description={sitesError}
+              onRetry={() => {
+                useSiteStore.setState({ hasLoaded: false, error: null });
+                fetchSites();
+              }}
+            />
+          ) : sites.length === 0 ? (
+            <EmptyState
+              icon="pin_drop"
+              title="No sites have been added yet."
+              description="Create a project and add a site to see it on the map."
+            />
+          ) : (
+            <MapView
+              sites={sites}
+              selectedSiteId={selectedSiteId}
+              onSiteSelect={setSelectedSiteId}
+              className="h-[380px] md:h-[480px]"
+              initialZoom={2.2}
+            />
+          )}
         </div>
 
         {/* Recent projects */}

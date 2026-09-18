@@ -2,7 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DashboardLayout } from '../../components/DashboardLayout/DashboardLayout';
 import { KpiCard } from '../../components/KpiCard/KpiCard';
-import { KpiCardSkeleton } from '../../components/LoadingSkeleton/LoadingSkeleton';
+import {
+  KpiCardSkeleton,
+  MapSkeleton,
+  TableSkeleton,
+} from '../../components/LoadingSkeleton/LoadingSkeleton';
 import { MapView } from '../../components/MapView/MapView';
 import { SiteTable } from '../../components/SiteTable/SiteTable';
 import { StatusBadge } from '../../components/StatusBadge/StatusBadge';
@@ -22,7 +26,13 @@ export function ProjectDetailPage() {
   const navigate = useNavigate();
   const selectedSiteId = useMapStore((state) => state.selectedSiteId);
   const setSelectedSiteId = useMapStore((state) => state.setSelectedSiteId);
-  const { getSitesByProjectId, getSiteById, fetchSites } = useSiteStore();
+  const {
+    getSitesByProjectId,
+    getSiteById,
+    fetchSites,
+    isLoading: isLoadingSites,
+    error: sitesError,
+  } = useSiteStore();
   const { getProjectById, fetchProjectById } = useProjectStore();
 
   const cachedProject = projectId ? getProjectById(projectId) : undefined;
@@ -205,7 +215,20 @@ export function ProjectDetailPage() {
           <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm px-space-sm">
             Project Map
           </h3>
-          {sites.length === 0 ? (
+          {isLoadingSites ? (
+            <div className="h-[360px] md:h-[440px]">
+              <MapSkeleton />
+            </div>
+          ) : sitesError ? (
+            <ErrorState
+              title="Unable to load sites."
+              description={sitesError}
+              onRetry={() => {
+                useSiteStore.setState({ hasLoaded: false, error: null });
+                fetchSites();
+              }}
+            />
+          ) : sites.length === 0 ? (
             <EmptyState
               icon="pin_drop"
               title="No geographical sites have been added."
@@ -224,7 +247,18 @@ export function ProjectDetailPage() {
 
         <div>
           <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm">Sites</h3>
-          {sites.length === 0 ? (
+          {isLoadingSites ? (
+            <TableSkeleton />
+          ) : sitesError ? (
+            <ErrorState
+              title="Unable to load sites."
+              description={sitesError}
+              onRetry={() => {
+                useSiteStore.setState({ hasLoaded: false, error: null });
+                fetchSites();
+              }}
+            />
+          ) : sites.length === 0 ? (
             <EmptyState
               icon="pin_drop"
               title="No geographical sites have been added."

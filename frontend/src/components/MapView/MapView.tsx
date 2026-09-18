@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { bbox as turfBbox } from '@turf/turf';
 import type { Site } from '../../types/dashboard';
 import { useMapStore, type AnalyticsMapMode } from '../../store/mapStore';
 import { MAP_COLORS, MAPBOX_STYLE_LIGHT, MAPBOX_STYLE_SATELLITE } from './mapStyle';
@@ -26,6 +27,15 @@ interface MapViewProps {
   initialZoom?: number;
   className?: string;
   showLayerControl?: boolean;
+  /**
+   * When true, the camera fits to the bounding box of every polygon in
+   * `sites` on load instead of using `initialCenter`/`initialZoom` — the
+   * appropriate default for a single-site detail view (e.g. Site
+   * Analytics) where "show the whole boundary, well-framed" matters more
+   * than a fixed zoom level that may crop or over-zoom depending on the
+   * site's actual size. Ignored when `sites` is empty.
+   */
+  fitBoundsToSites?: boolean;
   /**
    * Optional analytics visualization mode: when set to something other
    * than 'none', site polygons are shaded by relative intensity of the
@@ -79,6 +89,7 @@ export function MapView({
   initialZoom = 6,
   className = '',
   showLayerControl = true,
+  fitBoundsToSites = false,
   analyticsMode = 'none',
   metricValues,
 }: MapViewProps) {
@@ -180,6 +191,17 @@ export function MapView({
           'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 3, 1.5],
         },
       });
+
+      if (fitBoundsToSites && sites.length > 0) {
+        const [minX, minY, maxX, maxY] = turfBbox(sitesToFeatureCollection(sites));
+        map.fitBounds(
+          [
+            [minX, minY],
+            [maxX, maxY],
+          ],
+          { padding: 48, duration: 0, maxZoom: 17 },
+        );
+      }
 
       let hoveredId: string | number | null = null;
 

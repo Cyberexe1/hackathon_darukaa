@@ -194,3 +194,180 @@ def test_delete_site_success(client: TestClient, auth_headers):
 
     response = client.get(f"/sites/{created['id']}", headers=auth_headers)
     assert response.status_code == 404
+
+
+# --- Additional coverage: coordinate-range validation, direct PostGIS
+# storage verification, update-recalculation, delete/project isolation,
+# and unauthorized update/delete. ---
+
+from app.db.session import SessionLocal  # noqa: E402
+from sqlalchemy import text  # noqa: E402
+
+
+def test_create_site_rejects_out_of_range_longitude(client: TestClient, auth_headers):
+    project = _create_project(client, auth_headers)
+    invalid = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [200.0, 19.0],
+                [200.01, 19.0],
+                [200.01, 19.01],
+                [200.0, 19.01],
+                [200.0, 19.0],
+            ]
+        ],
+    }
+    response = client.post("/sites", json=make_site_payload(project["id"], geometry=invalid), headers=auth_headers)
+    assert response.status_code == 422
+
+
+def test_create_site_rejects_out_of_range_latitude(client: TestClient, auth_headers):
+    project = _create_project(client, auth_headers)
+    invalid = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [73.0, 95.0],
+                [73.01, 95.0],
+                [73.01, 95.01],
+                [73.0, 95.01],
+                [73.0, 95.0],
+            ]
+        ],
+    }
+    response = client.post("/sites", json=make_site_payload(project["id"], geometry=invalid), headers=auth_headers)
+    assert response.status_code == 422
+
+
+def test_create_site_stores_polygon_with_srid_4326_in_postgis(client: TestClient, auth_headers):
+    """Verifies the actual stored row in PostGIS — not just the API
+    response — has SRID 4326 and a POLYGON geometry type, confirming the
+    GeoJSON -> Shapely -> GeoAlchemy2 conversion path really persists a
+    proper PostGIS geometry column value rather than e.g. raw text/JSON.
+    """
+    project = _create_project(client, auth_headers)
+    created = client.post("/sites", json=make_site_payload(project["id"]), headers=auth_headers).json()
+
+    db = SessionLocal()
+    try:
+        row = db.execute(
+            text(
+                "SELECT ST_SRID(geometry) AS srid, GeometryType(geometry) AS geom_type "
+                "FROM sites WHERE id = :site_id"
+            ),
+            {"site_id": created["id"]},
+        ).one()
+    finally:
+        db.close()
+
+    assert row.srid == 4326
+    assert row.geom_type == "POLYGON"
+
+
+def test_create_site_measurements_match_direct_postgis_calculation(client: TestClient, auth_headers):
+    """Cross-checks the API's returned area_hectares/perimeter_km/centroid
+    against an independent PostGIS query run directly against the stored
+    row, using the exact same geography-cast formulas the service uses.
+    This confirms the persisted geometry (not just the in-memory Shapely
+    object at request time) round-trips correctly through PostGIS and
+    that the API response is not silently stale or mismatched.
+    """
+    project = _create_project(client, auth_headers)
+    created = client.post("/sites", json=make_site_payload(project["id"]), headers=auth_headers).json()
+
+    db = SessionLocal()
+    try:
+        row = db.execute(
+            text(
+                "SELECT "
+                "ST_Area(geometry::geography) / 10000.0 AS area_hectares, "
+                "ST_Perimeter(geometry::geography) / 1000.0 AS perimeter_km, "
+                "ST_Y(ST_Centroid(geometry)) AS centroid_lat, "
+                "ST_X(ST_Centroid(geometry)) AS centroid_lon "
+                "FROM sites WHERE id = :site_id"
+            ),
+            {"site_id": created["id"]},
+        ).one()
+    finally:
+        db.close()
+
+    assert created["area_hectares"] == round(float(row.area_hectares), 2)
+    assert created["perimeter_km"] == round(float(row.perimeter_km), 3)
+    assert created["centroid"]["lat"] == round(float(row.centroid_lat), 6)
+    assert created["centroid"]["lon"] == round(float(row.centroid_lon), 6)
+
+
+def test_update_site_geometry_recalculates_measurements(client: TestClient, auth_headers):
+    """Changing a site's polygon via PATCH must recompute area/perimeter/
+    centroid from the new geometry — never leave the old measurements
+    stale — and the recalculated values must be durable (a subsequent GET
+    reflects the same numbers, not just the PATCH response).
+    """
+    project = _create_project(client, auth_headers)
+    created = client.post("/sites", json=make_site_payload(project["id"]), headers=auth_headers).json()
+    original_area = created["area_hectares"]
+    original_centroid = created["centroid"]
+
+    # A ~5x larger square, shifted so its centroid also moves.
+    bigger_polygon = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [74.0, 20.0],
+                [74.05, 20.0],
+                [74.05, 20.05],
+                [74.0, 20.05],
+                [74.0, 20.0],
+            ]
+        ],
+    }
+    response = client.patch(f"/sites/{created['id']}", json={"geometry": bigger_polygon}, headers=auth_headers)
+    assert response.status_code == 200
+    updated = response.json()
+    assert updated["geometry"]["coordinates"] == bigger_polygon["coordinates"]
+    # ~25x the linear scale-up in area (5x width * 5x height).
+    assert updated["area_hectares"] > original_area * 15
+    assert updated["centroid"] != original_centroid
+
+    # No stale spatial data left behind — a fresh GET agrees with the PATCH response.
+    refetched = client.get(f"/sites/{created['id']}", headers=auth_headers).json()
+    assert refetched["area_hectares"] == updated["area_hectares"]
+    assert refetched["perimeter_km"] == updated["perimeter_km"]
+    assert refetched["centroid"] == updated["centroid"]
+    assert refetched["geometry"]["coordinates"] == bigger_polygon["coordinates"]
+
+
+def test_delete_site_does_not_delete_project(client: TestClient, auth_headers):
+    project = _create_project(client, auth_headers)
+    created = client.post("/sites", json=make_site_payload(project["id"]), headers=auth_headers).json()
+
+    response = client.delete(f"/sites/{created['id']}", headers=auth_headers)
+    assert response.status_code == 204
+
+    project_response = client.get(f"/projects/{project['id']}", headers=auth_headers)
+    assert project_response.status_code == 200
+    assert project_response.json()["id"] == project["id"]
+    assert project_response.json()["site_count"] == 0
+
+
+def test_update_site_owned_by_another_user_returns_403(client: TestClient, auth_headers, make_user):
+    project = _create_project(client, auth_headers)
+    created = client.post("/sites", json=make_site_payload(project["id"]), headers=auth_headers).json()
+
+    other_headers, _uid, _email = make_user("Someone Else")
+    response = client.patch(f"/sites/{created['id']}", json={"name": "Hijacked"}, headers=other_headers)
+    assert response.status_code == 403
+
+
+def test_delete_site_owned_by_another_user_returns_403(client: TestClient, auth_headers, make_user):
+    project = _create_project(client, auth_headers)
+    created = client.post("/sites", json=make_site_payload(project["id"]), headers=auth_headers).json()
+
+    other_headers, _uid, _email = make_user("Someone Else")
+    response = client.delete(f"/sites/{created['id']}", headers=other_headers)
+    assert response.status_code == 403
+
+    # Confirm it genuinely wasn't deleted.
+    still_there = client.get(f"/sites/{created['id']}", headers=auth_headers)
+    assert still_there.status_code == 200

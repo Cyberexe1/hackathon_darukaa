@@ -8,6 +8,7 @@ import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { Modal } from '../../components/Modal/Modal';
 import { ConfirmDialog } from '../../components/ConfirmDialog/ConfirmDialog';
 import { MetricForm } from '../../components/MetricForm/MetricForm';
+import { AddSiteFlow } from '../../components/AddSiteFlow/AddSiteFlow';
 import { KpiCard } from '../../components/KpiCard/KpiCard';
 import { PerformanceSummaryCard } from '../../components/PerformanceSummaryCard/PerformanceSummaryCard';
 import { CarbonChart } from '../../components/charts/CarbonChart';
@@ -42,7 +43,7 @@ import type {
 export function SiteAnalyticsPage() {
   const { siteId } = useParams<{ siteId: string }>();
   const navigate = useNavigate();
-  const { getSiteById, fetchSiteById } = useSiteStore();
+  const { getSiteById, fetchSiteById, deleteSite } = useSiteStore();
   const { getProjectById, fetchProjectById } = useProjectStore();
 
   const cachedSite = siteId ? getSiteById(siteId) : undefined;
@@ -63,6 +64,11 @@ export function SiteAnalyticsPage() {
   const [editingMetric, setEditingMetric] = useState<SiteMetric | null>(null);
   const [deletingMetric, setDeletingMetric] = useState<SiteMetric | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const [editSiteOpen, setEditSiteOpen] = useState(false);
+  const [deleteSiteOpen, setDeleteSiteOpen] = useState(false);
+  const [isDeletingSite, setIsDeletingSite] = useState(false);
+  const [deleteSiteError, setDeleteSiteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!siteId || cachedSite) return;
@@ -164,6 +170,20 @@ export function SiteAnalyticsPage() {
     }
   };
 
+  const handleDeleteSite = async () => {
+    if (!site) return;
+    setIsDeletingSite(true);
+    setDeleteSiteError(null);
+    try {
+      await deleteSite(site.id);
+      navigate(project ? `/projects/${project.id}` : '/sites');
+    } catch (err) {
+      setDeleteSiteError(getApiErrorMessage(err, 'Unable to delete this site. Please try again.'));
+    } finally {
+      setIsDeletingSite(false);
+    }
+  };
+
   if (isLoadingSite) {
     return (
       <DashboardLayout pageTitle="Loading…">
@@ -204,30 +224,76 @@ export function SiteAnalyticsPage() {
             Dashboard
           </Link>
           <span className="mx-1">/</span>
-          <Link to="/sites" className="hover:text-primary">
-            Sites
-          </Link>
+          {project ? (
+            <Link to={`/projects/${project.id}`} className="hover:text-primary">
+              {project.name}
+            </Link>
+          ) : (
+            <Link to="/sites" className="hover:text-primary">
+              Sites
+            </Link>
+          )}
           <span className="mx-1">/</span>
           <span className="text-primary">{site.name}</span>
         </nav>
 
-        <div className="flex items-center gap-space-sm flex-wrap">
-          <h2 className="font-headline-lg text-headline-lg text-primary">{site.name}</h2>
-          <StatusBadge status={site.status} />
+        <div className="flex items-start justify-between gap-space-md flex-wrap">
+          <div>
+            <div className="flex items-center gap-space-sm flex-wrap">
+              <h2 className="font-headline-lg text-headline-lg text-primary">{site.name}</h2>
+              <StatusBadge status={site.status} />
+            </div>
+            {site.description && (
+              <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-1">
+                {site.description}
+              </p>
+            )}
+            {project && (
+              <p className="font-label-technical text-label-micro text-on-surface-variant mt-space-xs">
+                Project:{' '}
+                <Link
+                  to={`/projects/${project.id}`}
+                  className="text-surface-tint hover:text-primary"
+                >
+                  {project.name}
+                </Link>
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-space-sm">
+            <button
+              type="button"
+              onClick={() => navigate(project ? `/projects/${project.id}` : '/sites')}
+              className="inline-flex items-center gap-1.5 px-space-md py-space-sm rounded-lg font-headline-sm text-body-sm text-on-surface-variant hover:bg-surface-container transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                arrow_back
+              </span>
+              Back to Project
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditSiteOpen(true)}
+              className="inline-flex items-center gap-1.5 px-space-md py-space-sm rounded-lg font-headline-sm text-body-sm text-primary bg-surface-container hover:bg-surface-container-high transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                edit
+              </span>
+              Edit Site
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeleteSiteOpen(true)}
+              className="inline-flex items-center gap-1.5 px-space-md py-space-sm rounded-lg font-headline-sm text-body-sm text-error hover:bg-error-container transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
+                delete
+              </span>
+              Delete Site
+            </button>
+          </div>
         </div>
-        {site.description && (
-          <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl -mt-space-sm">
-            {site.description}
-          </p>
-        )}
-        {project && (
-          <p className="font-label-technical text-label-micro text-on-surface-variant -mt-space-sm">
-            Project:{' '}
-            <Link to={`/projects/${project.id}`} className="text-surface-tint hover:text-primary">
-              {project.name}
-            </Link>
-          </p>
-        )}
 
         {/* Summary cards */}
         {isLoadingAnalytics ? (
@@ -286,19 +352,57 @@ export function SiteAnalyticsPage() {
           </div>
         )}
 
-        {/* Site boundary map */}
+        {/* Site boundary map + location figures */}
         <div className="bg-surface-container-lowest rounded-2xl shadow-sm p-space-sm md:p-space-md">
           <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm px-space-sm">
-            Site Boundary
+            Location
           </h3>
           <MapView
             sites={[site]}
             selectedSiteId={site.id}
             className="h-[320px] md:h-[400px]"
             initialCenter={[site.centroid.lon, site.centroid.lat]}
-            initialZoom={13}
+            fitBoundsToSites
             showLayerControl={false}
           />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-space-sm mt-space-sm px-space-sm">
+            <div className="p-space-sm bg-surface-container-low rounded-lg">
+              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">
+                Area
+              </span>
+              <span className="font-headline-sm text-headline-sm text-primary">
+                {site.area_hectares.toLocaleString()} ha
+              </span>
+            </div>
+            <div className="p-space-sm bg-surface-container-low rounded-lg">
+              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">
+                Perimeter
+              </span>
+              <span className="font-headline-sm text-headline-sm text-primary">
+                {site.perimeter_km.toLocaleString()} km
+              </span>
+            </div>
+            <div className="p-space-sm bg-surface-container-low rounded-lg">
+              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">
+                Centroid
+              </span>
+              <span className="font-headline-sm text-headline-sm text-primary">
+                {site.centroid.lon.toFixed(2)}&deg;, {site.centroid.lat.toFixed(2)}&deg;
+              </span>
+            </div>
+            <div className="p-space-sm bg-surface-container-low rounded-lg">
+              <span className="font-label-technical text-label-micro text-on-surface-variant uppercase block">
+                Created
+              </span>
+              <span className="font-headline-sm text-headline-sm text-primary">
+                {new Date(site.created_at).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Environmental analytics */}
@@ -467,6 +571,28 @@ export function SiteAnalyticsPage() {
         isConfirming={isDeleting}
         onConfirm={handleDeleteMetric}
         onCancel={() => setDeletingMetric(null)}
+      />
+
+      <AddSiteFlow
+        isOpen={editSiteOpen}
+        onClose={() => setEditSiteOpen(false)}
+        site={site}
+        onUpdated={(updated) => setFetchedSite(updated)}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteSiteOpen}
+        title={`Delete "${site.name}"?`}
+        description={
+          deleteSiteError ??
+          'This permanently removes the site, its boundary, and all of its environmental measurements. This action cannot be undone.'
+        }
+        isConfirming={isDeletingSite}
+        onConfirm={handleDeleteSite}
+        onCancel={() => {
+          setDeleteSiteOpen(false);
+          setDeleteSiteError(null);
+        }}
       />
     </DashboardLayout>
   );

@@ -90,6 +90,10 @@ class FakeMap {
     return { style: {} };
   }
 
+  fitBounds() {
+    return this;
+  }
+
   remove() {
     this.removed = true;
   }

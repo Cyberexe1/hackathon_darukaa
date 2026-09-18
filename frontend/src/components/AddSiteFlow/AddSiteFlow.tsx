@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Feature, Polygon } from 'geojson';
 import { Modal } from '../Modal/Modal';
 import { DrawMap } from './DrawMap';
@@ -8,15 +8,21 @@ import { useSiteStore } from '../../store/siteStore';
 import { getApiErrorMessage } from '../../services/apiError';
 import type { Site } from '../../types/dashboard';
 
-type Step = 1 | 2 | 3 | 4 | 5;
+type StepKey = 'project' | 'name' | 'draw' | 'review' | 'save';
 
-const STEP_LABELS: Record<Step, string> = {
-  1: 'Select Project',
-  2: 'Site Name',
-  3: 'Draw Boundary',
-  4: 'Review Geometry',
-  5: 'Save Site',
+const STEP_LABELS: Record<StepKey, string> = {
+  project: 'Select Project',
+  name: 'Site Name',
+  draw: 'Draw Boundary',
+  review: 'Review Geometry',
+  save: 'Save Site',
 };
+
+// Edit mode skips "Select Project" — a site's project assignment isn't
+// editable here (out of scope for a boundary/name edit), so re-showing
+// that step would just be a disabled no-op control.
+const CREATE_STEPS: StepKey[] = ['project', 'name', 'draw', 'review', 'save'];
+const EDIT_STEPS: StepKey[] = ['name', 'draw', 'review', 'save'];
 
 interface AddSiteFlowProps {
   isOpen: boolean;
@@ -25,28 +31,62 @@ interface AddSiteFlowProps {
   onCreated?: (site: Site) => void;
   /** Pre-select a project (e.g. when launched from a Project Detail page). */
   defaultProjectId?: string;
+  /**
+   * When provided, the flow runs in "edit" mode: it pre-fills the site's
+   * current name/description/boundary, skips the project-selection step
+   * (a site's project isn't reassignable here), and calls
+   * `siteStore.updateSite` instead of `addSite` on save. Nothing is
+   * persisted until the user reaches the final step and clicks
+   * Save — dragging vertices or editing the name beforehand never
+   * touches the backend, and clicking Cancel/closing the modal discards
+   * the in-progress edit entirely, leaving the previously saved site
+   * untouched.
+   */
+  site?: Site | null;
+  /** Fired after a successful edit-mode save, with the updated site. */
+  onUpdated?: (site: Site) => void;
 }
 
 /**
- * Five-step Add Site wizard: select project -> name the site -> draw the
- * boundary with Mapbox GL Draw -> review geometry (a live Turf.js preview
- * of area/perimeter/centroid) -> save. Only the raw GeoJSON polygon is
- * POSTed to FastAPI (`siteService.createSite`) — the backend recomputes
- * area/perimeter/centroid authoritatively from the PostGIS geometry, so
- * the saved site's figures may differ very slightly from this preview.
+ * Add/Edit Site wizard: select project (create only) -> name the site ->
+ * draw the boundary with Mapbox GL Draw -> review geometry (a live
+ * Turf.js preview of area/perimeter/centroid) -> save. Only the raw
+ * GeoJSON polygon is sent to FastAPI (`siteService.createSite`/
+ * `updateSite`) — the backend recomputes area/perimeter/centroid
+ * authoritatively from the PostGIS geometry, so the saved site's figures
+ * may differ very slightly from this preview.
  */
-export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: AddSiteFlowProps) {
+export function AddSiteFlow({
+  isOpen,
+  onClose,
+  onCreated,
+  defaultProjectId,
+  site,
+  onUpdated,
+}: AddSiteFlowProps) {
+  const isEditMode = Boolean(site);
+  const steps = isEditMode ? EDIT_STEPS : CREATE_STEPS;
   const addSite = useSiteStore((state) => state.addSite);
+  const updateSite = useSiteStore((state) => state.updateSite);
   const { projects, fetchProjects } = useProjectStore();
-  const [step, setStep] = useState<Step>(1);
-  const [projectId, setProjectId] = useState(defaultProjectId ?? '');
-  const [siteName, setSiteName] = useState('');
-  const [description, setDescription] = useState('');
+  const [stepIndex, setStepIndex] = useState(0);
+  const [projectId, setProjectId] = useState(site?.project_id ?? defaultProjectId ?? '');
+  const [siteName, setSiteName] = useState(site?.name ?? '');
+  const [description, setDescription] = useState(site?.description ?? '');
   const [polygonFeature, setPolygonFeature] = useState<Feature<Polygon> | null>(null);
   const [summary, setSummary] = useState<GeometrySummary | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const step = steps[stepIndex];
+
+  // The site's existing geometry, converted once to a Feature so it can
+  // be handed to DrawMap as its starting boundary in edit mode.
+  const initialFeature = useMemo<Feature<Polygon> | null>(() => {
+    if (!site) return null;
+    return { type: 'Feature', properties: {}, geometry: site.geometry };
+  }, [site]);
 
   // The project picker must reflect projects actually persisted to the
   // backend (including ones just created via ProjectForm this session),
@@ -56,10 +96,10 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
   }, [isOpen, fetchProjects]);
 
   const reset = () => {
-    setStep(1);
-    setProjectId(defaultProjectId ?? '');
-    setSiteName('');
-    setDescription('');
+    setStepIndex(0);
+    setProjectId(site?.project_id ?? defaultProjectId ?? '');
+    setSiteName(site?.name ?? '');
+    setDescription(site?.description ?? '');
     setPolygonFeature(null);
     setSummary(null);
     setSaveError(null);
@@ -76,13 +116,13 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
     setSummary(feature ? computeGeometrySummary(feature) : null);
   };
 
-  const goNext = () => setStep((s) => Math.min(s + 1, 5) as Step);
-  const goBack = () => setStep((s) => Math.max(s - 1, 1) as Step);
+  const goNext = () => setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+  const goBack = () => setStepIndex((i) => Math.max(i - 1, 0));
 
   const canProceed = (): boolean => {
-    if (step === 1) return Boolean(projectId);
-    if (step === 2) return siteName.trim().length > 0;
-    if (step === 3) return Boolean(polygonFeature);
+    if (step === 'project') return Boolean(projectId);
+    if (step === 'name') return siteName.trim().length > 0;
+    if (step === 'draw') return Boolean(polygonFeature);
     return true;
   };
 
@@ -91,14 +131,23 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
     setIsSaving(true);
     setSaveError(null);
     try {
-      const created = await addSite({
-        project_id: projectId,
-        name: siteName.trim(),
-        description: description.trim(),
-        geometry: toGeoJSONPolygon(polygonFeature),
-        status: 'In Review',
-      });
-      onCreated?.(created);
+      if (isEditMode && site) {
+        const updated = await updateSite(site.id, {
+          name: siteName.trim(),
+          description: description.trim(),
+          geometry: toGeoJSONPolygon(polygonFeature),
+        });
+        onUpdated?.(updated);
+      } else {
+        const created = await addSite({
+          project_id: projectId,
+          name: siteName.trim(),
+          description: description.trim(),
+          geometry: toGeoJSONPolygon(polygonFeature),
+          status: 'In Review',
+        });
+        onCreated?.(created);
+      }
       // Show a brief success state instead of closing immediately, so the
       // user gets clear confirmation the site (and its boundary) actually
       // persisted before the modal disappears.
@@ -108,7 +157,12 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
       }, 1400);
     } catch (error) {
       setSaveError(
-        getApiErrorMessage(error, 'Unable to save the site boundary. Please try again.'),
+        getApiErrorMessage(
+          error,
+          isEditMode
+            ? 'Unable to save the site changes. Please try again.'
+            : 'Unable to save the site boundary. Please try again.',
+        ),
       );
     } finally {
       setIsSaving(false);
@@ -116,25 +170,30 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Add Site" widthClassName="max-w-2xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={isEditMode ? 'Edit Site' : 'Add Site'}
+      widthClassName="max-w-2xl"
+    >
       {/* Step indicator */}
       <div
         className="flex items-center gap-1 mb-space-lg"
-        aria-label={`Step ${step} of 5: ${STEP_LABELS[step]}`}
+        aria-label={`Step ${stepIndex + 1} of ${steps.length}: ${STEP_LABELS[step]}`}
       >
-        {([1, 2, 3, 4, 5] as Step[]).map((s) => (
+        {steps.map((s, i) => (
           <div key={s} className="flex-1">
             <div
-              className={`h-1 rounded-full ${s <= step ? 'bg-surface-tint' : 'bg-surface-container-high'}`}
+              className={`h-1 rounded-full ${i <= stepIndex ? 'bg-surface-tint' : 'bg-surface-container-high'}`}
             />
           </div>
         ))}
       </div>
       <p className="font-label-technical text-label-micro text-surface-tint uppercase mb-space-md">
-        Step {step} of 5 &middot; {STEP_LABELS[step]}
+        Step {stepIndex + 1} of {steps.length} &middot; {STEP_LABELS[step]}
       </p>
 
-      {step === 1 && (
+      {step === 'project' && (
         <div className="flex flex-col gap-space-sm">
           <label
             htmlFor="add-site-project"
@@ -163,7 +222,7 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
         </div>
       )}
 
-      {step === 2 && (
+      {step === 'name' && (
         <div className="flex flex-col gap-space-md">
           <div className="flex flex-col gap-1">
             <label
@@ -199,12 +258,18 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
         </div>
       )}
 
-      {step === 3 && (
+      {step === 'draw' && (
         <div className="flex flex-col gap-space-sm">
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Draw the site boundary directly on the map. Use the polygon tool to place vertices.
+            {isEditMode
+              ? 'Adjust the site boundary, draw a new one, or import a GeoJSON polygon. Nothing is saved until you confirm on the final step.'
+              : 'Draw the site boundary directly on the map, or import an existing GeoJSON polygon.'}
           </p>
-          <DrawMap onPolygonChange={handlePolygonChange} className="h-[360px] md:h-[420px]" />
+          <DrawMap
+            onPolygonChange={handlePolygonChange}
+            className="h-[360px] md:h-[420px]"
+            initialFeature={initialFeature}
+          />
           {!polygonFeature && (
             <p className="font-label-technical text-label-micro text-on-surface-variant">
               No boundary drawn yet — draw a polygon to continue.
@@ -213,7 +278,7 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
         </div>
       )}
 
-      {step === 4 && summary && (
+      {step === 'review' && summary && (
         <div className="flex flex-col gap-space-md">
           <p className="font-body-sm text-body-sm text-on-surface-variant">
             Review the calculated geometry before saving. These figures are an estimate computed
@@ -250,17 +315,26 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
               Summary
             </span>
             <p className="font-body-sm text-body-sm text-on-surface">
-              <span className="font-medium text-primary">{siteName}</span> will be added to{' '}
-              <span className="font-medium text-primary">
-                {projects.find((p) => p.id === projectId)?.name ?? 'the selected project'}
-              </span>
-              .
+              {isEditMode ? (
+                <>
+                  <span className="font-medium text-primary">{siteName}</span> will be updated with
+                  this boundary.
+                </>
+              ) : (
+                <>
+                  <span className="font-medium text-primary">{siteName}</span> will be added to{' '}
+                  <span className="font-medium text-primary">
+                    {projects.find((p) => p.id === projectId)?.name ?? 'the selected project'}
+                  </span>
+                  .
+                </>
+              )}
             </p>
           </div>
         </div>
       )}
 
-      {step === 5 && (
+      {step === 'save' && (
         <div className="flex flex-col items-center text-center gap-space-md py-space-md">
           {isSaving ? (
             <>
@@ -281,10 +355,13 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
                 check_circle
               </span>
               <p className="font-headline-sm text-headline-sm text-primary">
-                Site saved successfully!
+                {isEditMode ? 'Site updated successfully!' : 'Site saved successfully!'}
               </p>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
-                &ldquo;{siteName}&rdquo; is now visible on the project and dashboard maps.
+                &ldquo;{siteName}&rdquo;{' '}
+                {isEditMode
+                  ? 'has been updated on the project and dashboard maps.'
+                  : 'is now visible on the project and dashboard maps.'}
               </p>
             </>
           ) : saveError ? (
@@ -314,13 +391,13 @@ export function AddSiteFlow({ isOpen, onClose, onCreated, defaultProjectId }: Ad
         <div className="flex items-center justify-between mt-space-lg pt-space-md border-t border-outline-variant/30">
           <button
             type="button"
-            onClick={step === 1 ? handleClose : goBack}
+            onClick={stepIndex === 0 ? handleClose : goBack}
             className="px-space-lg py-space-sm rounded-lg font-headline-sm text-body-sm text-on-surface-variant hover:bg-surface-container transition-colors"
           >
-            {step === 1 ? 'Cancel' : 'Back'}
+            {stepIndex === 0 ? 'Cancel' : 'Back'}
           </button>
 
-          {step < 5 ? (
+          {stepIndex < steps.length - 1 ? (
             <button
               type="button"
               onClick={goNext}

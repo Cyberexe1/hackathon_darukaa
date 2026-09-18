@@ -154,3 +154,8 @@ def test_dashboard_analytics_reflects_owned_data_only(client: TestClient, auth_h
     assert response.status_code == 200
     body = response.json()
     assert body["carbon_total"] == 1000
+
+
+def test_site_analytics_missing_site_returns_404(client: TestClient, auth_headers):
+    response = client.get("/sites/does-not-exist/analytics", headers=auth_headers)
+    assert response.status_code == 404

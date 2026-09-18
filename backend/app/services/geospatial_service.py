@@ -55,6 +55,28 @@ def geojson_to_shape(geojson: dict[str, Any]) -> BaseGeometry:
     if outer_ring[0] != outer_ring[-1]:
         raise InvalidGeometryError("Invalid site boundary. The polygon must be closed. Please redraw it.")
 
+    # Every ring's every position must be a plausible [longitude, latitude]
+    # pair before we ever hand this to Shapely/PostGIS — a malformed or
+    # out-of-range value here (e.g. swapped lat/lon, or a non-geographic
+    # coordinate system) would otherwise silently produce a "valid" but
+    # nonsensical polygon rather than a clear rejection.
+    for ring in coordinates:
+        if not isinstance(ring, list):
+            raise InvalidGeometryError("Invalid site boundary. Please redraw the polygon.")
+        for position in ring:
+            if (
+                not isinstance(position, list)
+                or len(position) < 2
+                or not all(isinstance(v, int | float) for v in position[:2])
+            ):
+                raise InvalidGeometryError("Invalid site boundary. Please redraw the polygon.")
+            lon, lat = position[0], position[1]
+            if not (-180.0 <= lon <= 180.0) or not (-90.0 <= lat <= 90.0):
+                raise InvalidGeometryError(
+                    "Invalid site boundary. Coordinates must be valid longitude "
+                    "(-180 to 180) and latitude (-90 to 90) values. Please redraw it."
+                )
+
     try:
         geom = shape(geojson)
     except (ValueError, TypeError, AttributeError) as exc:

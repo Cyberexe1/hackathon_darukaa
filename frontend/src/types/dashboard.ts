@@ -201,3 +201,9 @@ export interface ChartPoint {
   label: string;
   value: number;
 }
+
+/** Spec-literal alias for `ChartPoint` — the shape every chart component
+ * (`CarbonChart`, `BiodiversityChart`, `VegetationChart`, `TreeCoverChart`)
+ * actually consumes. Kept as an alias rather than a duplicate type so
+ * there is exactly one definition to maintain. */
+export type MetricPoint = ChartPoint;
