@@ -1,0 +1,34 @@
+# Render Blueprint for the Darukaa.Earth FastAPI backend.
+# See: https://render.com/docs/blueprint-spec
+#
+# This does NOT provision a database on Render — Neon PostgreSQL remains
+# the production database (see task requirement: "Do not move the
+# database into Render"). DATABASE_URL must be set manually in the
+# Render dashboard (or via `render.yaml` env var UI) to your Neon
+# connection string; it is never committed here.
+services:
+  - type: web
+    name: darukaa-earth-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+      - key: CORS_ORIGINS
+        sync: false
+      - key: DEBUG
+        value: "False"
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.13.1"

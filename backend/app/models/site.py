@@ -1,7 +1,7 @@
 """SQLAlchemy Site model, backed by a PostGIS POLYGON geometry column."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from geoalchemy2 import Geometry
 from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text
@@ -15,7 +15,7 @@ SITE_STATUSES = ("Active", "Verified", "In Review", "Paused")
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Site(Base):
@@ -48,3 +48,6 @@ class Site(Base):
     )
 
     project: Mapped["Project"] = relationship("Project", back_populates="sites")
+    metrics: Mapped[list["SiteMetric"]] = relationship(
+        "SiteMetric", back_populates="site", cascade="all, delete-orphan", passive_deletes=True
+    )

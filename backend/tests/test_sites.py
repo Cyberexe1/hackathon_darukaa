@@ -65,9 +65,7 @@ def test_create_site_unclosed_polygon(client: TestClient, auth_headers):
         "type": "Polygon",
         "coordinates": [[[73.0, 19.0], [73.01, 19.0], [73.01, 19.01]]],
     }
-    response = client.post(
-        "/sites", json=make_site_payload(project["id"], geometry=unclosed), headers=auth_headers
-    )
+    response = client.post("/sites", json=make_site_payload(project["id"], geometry=unclosed), headers=auth_headers)
     assert response.status_code == 422
     assert "detail" in response.json()
 
@@ -75,9 +73,7 @@ def test_create_site_unclosed_polygon(client: TestClient, auth_headers):
 def test_create_site_empty_coordinates(client: TestClient, auth_headers):
     project = _create_project(client, auth_headers)
     empty = {"type": "Polygon", "coordinates": []}
-    response = client.post(
-        "/sites", json=make_site_payload(project["id"], geometry=empty), headers=auth_headers
-    )
+    response = client.post("/sites", json=make_site_payload(project["id"], geometry=empty), headers=auth_headers)
     assert response.status_code == 422
 
 
@@ -86,17 +82,17 @@ def test_create_site_self_intersecting_polygon(client: TestClient, auth_headers)
     # A classic bowtie/hourglass self-intersecting ring.
     bowtie = {
         "type": "Polygon",
-        "coordinates": [[
-            [73.0, 19.0],
-            [73.01, 19.01],
-            [73.01, 19.0],
-            [73.0, 19.01],
-            [73.0, 19.0],
-        ]],
+        "coordinates": [
+            [
+                [73.0, 19.0],
+                [73.01, 19.01],
+                [73.01, 19.0],
+                [73.0, 19.01],
+                [73.0, 19.0],
+            ]
+        ],
     }
-    response = client.post(
-        "/sites", json=make_site_payload(project["id"], geometry=bowtie), headers=auth_headers
-    )
+    response = client.post("/sites", json=make_site_payload(project["id"], geometry=bowtie), headers=auth_headers)
     assert response.status_code == 422
 
 

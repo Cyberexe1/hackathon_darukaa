@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../../components/DashboardLayout/DashboardLayout';
 import { KpiCard, CompactKpiCard } from '../../components/KpiCard/KpiCard';
@@ -9,15 +9,21 @@ import { Modal } from '../../components/Modal/Modal';
 import { ProjectForm } from '../../components/ProjectForm/ProjectForm';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
-import { TableSkeleton } from '../../components/LoadingSkeleton/LoadingSkeleton';
+import { TableSkeleton, KpiCardSkeleton } from '../../components/LoadingSkeleton/LoadingSkeleton';
 import { useProjectStore } from '../../store/projectStore';
 import { useMapStore } from '../../store/mapStore';
 import { useSiteStore } from '../../store/siteStore';
+import { analyticsService } from '../../services/analyticsService';
+import type { DashboardAnalyticsResponse } from '../../types/dashboard';
 
 /**
  * /dashboard — the authenticated environmental intelligence overview.
  * Primary KPI row (animated counters), secondary indicator row, the main
- * geospatial map with site polygons, and a recent projects table.
+ * geospatial map with site polygons, and a recent projects table. KPIs
+ * are backed by `GET /analytics/dashboard` (real SQL aggregation, see
+ * backend/app/services/analytics_service.py::get_dashboard_analytics) —
+ * carbon/biodiversity/vegetation show "No monitoring data" rather than a
+ * fabricated number when no site_metrics rows exist yet.
  */
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -27,17 +33,39 @@ export function DashboardPage() {
   const setSelectedSiteId = useMapStore((state) => state.setSelectedSiteId);
   const [createOpen, setCreateOpen] = useState(false);
 
+  const [analytics, setAnalytics] = useState<DashboardAnalyticsResponse | null>(null);
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(true);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+
   useEffect(() => {
     fetchProjects();
     fetchSites();
   }, [fetchProjects, fetchSites]);
 
-  // Database-driven KPIs derived directly from the project/site stores —
-  // no fabricated carbon/biodiversity numbers. Those metrics aren't
-  // implemented yet, so they intentionally show "No monitoring data"
-  // rather than invented figures.
-  const totalArea = sites.reduce((sum, s) => sum + s.area_hectares, 0);
-  const activeSites = sites.filter((s) => s.status === 'Active' || s.status === 'Verified').length;
+  const loadAnalytics = useCallback(async () => {
+    setIsLoadingAnalytics(true);
+    setAnalyticsError(null);
+    try {
+      const data = await analyticsService.getDashboardAnalytics();
+      setAnalytics(data);
+    } catch {
+      // Non-fatal for the whole dashboard — projects/sites/map still work
+      // even if the analytics aggregation call fails.
+      setAnalyticsError('Unable to load environmental analytics.');
+    } finally {
+      setIsLoadingAnalytics(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // State updates happen in `loadAnalytics`'s async continuation after
+    // `await`, not synchronously in this effect body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadAnalytics();
+  }, [loadAnalytics]);
+
+  const totalArea = analytics?.total_area_hectares ?? sites.reduce((sum, s) => sum + s.area_hectares, 0);
+  const activeSites = analytics?.active_sites ?? sites.filter((s) => s.status === 'Active' || s.status === 'Verified').length;
 
   const selectedSite = selectedSiteId ? getSiteById(selectedSiteId) ?? null : null;
   const recentProjects = [...projects]
@@ -64,34 +92,69 @@ export function DashboardPage() {
           </button>
         </div>
 
-        {/* Primary KPI row — all derived directly from the database via projectStore/siteStore. */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-          <KpiCard icon="forest" label="Total Projects" target={projects.length} description="Environmental projects in your portfolio." />
-          <KpiCard icon="pin_drop" label="Total Sites" target={sites.length} description="Geographical sites being monitored." />
-          <KpiCard
-            icon="satellite_alt"
-            label="Total Area"
-            target={totalArea}
-            suffix=" ha"
-            formatValue={(v) => v.toLocaleString()}
-            description="Total mapped site area."
-          />
-          <KpiCard
-            icon="co2"
-            label="Carbon Impact"
-            staticValue="—"
-            tone="accent"
-            description="No monitoring data"
-          />
-        </div>
+        {/* Primary KPI row — database-driven via GET /analytics/dashboard (falls back to store-derived counts if that call fails). */}
+        {isLoadingAnalytics ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            {Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <KpiCard
+              icon="forest"
+              label="Total Projects"
+              target={analytics?.total_projects ?? projects.length}
+              description="Environmental projects in your portfolio."
+            />
+            <KpiCard
+              icon="pin_drop"
+              label="Total Sites"
+              target={analytics?.total_sites ?? sites.length}
+              description="Geographical sites being monitored."
+            />
+            <KpiCard
+              icon="satellite_alt"
+              label="Total Area"
+              target={totalArea}
+              suffix=" ha"
+              formatValue={(v) => v.toLocaleString()}
+              description="Total mapped site area."
+            />
+            <KpiCard
+              icon="co2"
+              label="Carbon Impact"
+              target={analytics?.carbon_total ?? undefined}
+              staticValue={analytics?.carbon_total == null ? 'No data available' : undefined}
+              suffix={analytics?.carbon_total != null ? ' tCO\u2082e' : undefined}
+              formatValue={(v) => v.toLocaleString()}
+              tone="accent"
+            />
+          </div>
+        )}
 
         {/* Secondary indicator row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-gutter-sm">
-          <CompactKpiCard icon="eco" label="Biodiversity Score" value="No monitoring data" />
-          <CompactKpiCard icon="grass" label="Vegetation Index" value="No monitoring data" />
+          <CompactKpiCard
+            icon="eco"
+            label="Biodiversity Score"
+            value={analytics?.avg_biodiversity_score != null ? `${analytics.avg_biodiversity_score} / 100` : 'No data available'}
+          />
+          <CompactKpiCard
+            icon="grass"
+            label="Vegetation Index"
+            value={analytics?.avg_vegetation_index != null ? analytics.avg_vegetation_index.toFixed(2) : 'No data available'}
+          />
           <CompactKpiCard icon="check_circle" label="Active Sites" value={String(activeSites)} />
           <CompactKpiCard icon="folder" label="Projects" value={String(projects.length)} />
         </div>
+
+        {analyticsError && (
+          <p className="font-body-sm text-body-sm text-on-surface-variant -mt-space-sm">
+            {analyticsError}{' '}
+            <button type="button" onClick={loadAnalytics} className="text-surface-tint hover:text-primary underline">
+              Retry
+            </button>
+          </p>
+        )}
 
         {/* Main geospatial map */}
         <div className="bg-surface-container-lowest rounded-2xl shadow-sm p-space-sm md:p-space-md">

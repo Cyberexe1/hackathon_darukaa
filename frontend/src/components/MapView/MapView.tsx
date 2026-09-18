@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import type { Site } from '../../types/dashboard';
-import { useMapStore } from '../../store/mapStore';
+import { useMapStore, type AnalyticsMapMode } from '../../store/mapStore';
 import { MAP_COLORS, MAPBOX_STYLE_LIGHT, MAPBOX_STYLE_SATELLITE } from './mapStyle';
 import { ErrorState } from '../ErrorState/ErrorState';
 import { MapSkeleton } from '../LoadingSkeleton/LoadingSkeleton';
+import { AnalyticsMapLegend } from './AnalyticsMapLegend';
+import { ANALYTICS_MODE_COLORS } from './analyticsMapColors';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
 
@@ -18,15 +20,34 @@ interface MapViewProps {
   initialZoom?: number;
   className?: string;
   showLayerControl?: boolean;
+  /**
+   * Optional analytics visualization mode: when set to something other
+   * than 'none', site polygons are shaded by relative intensity of the
+   * selected metric (from `metricValues`) instead of the flat default
+   * fill. This is a product visualization of the stored dataset, not a
+   * scientific/satellite-derived heatmap — the legend labels it plainly
+   * as "Low/Medium/High" relative intensity, never implying a calibrated
+   * or scientifically-validated color scale.
+   */
+  analyticsMode?: AnalyticsMapMode;
+  /** Maps site id -> the metric value used for analytics-mode shading
+   * (e.g. each site's latest carbon_tco2e). Sites missing from this map
+   * render with the default flat styling regardless of `analyticsMode`. */
+  metricValues?: Record<string, number>;
 }
 
-function sitesToFeatureCollection(sites: Site[]): GeoJSON.FeatureCollection {
+function sitesToFeatureCollection(sites: Site[], metricValues?: Record<string, number>): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
     features: sites.map((site) => ({
       type: 'Feature',
       id: site.id,
-      properties: { id: site.id, name: site.name, area: site.area_hectares },
+      properties: {
+        id: site.id,
+        name: site.name,
+        area: site.area_hectares,
+        metricValue: metricValues?.[site.id] ?? null,
+      },
       geometry: site.geometry,
     })),
   };
@@ -49,6 +70,8 @@ export function MapView({
   initialZoom = 6,
   className = '',
   showLayerControl = true,
+  analyticsMode = 'none',
+  metricValues,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -105,7 +128,7 @@ export function MapView({
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
 
     map.on('load', () => {
-      map.addSource('sites', { type: 'geojson', data: sitesToFeatureCollection(sites) });
+      map.addSource('sites', { type: 'geojson', data: sitesToFeatureCollection(sites, metricValues) });
 
       map.addLayer({
         id: 'sites-fill',
@@ -213,14 +236,6 @@ export function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retryKey]);
 
-  // Keep the source data fresh if the sites prop changes after init.
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !isLoaded) return;
-    const source = map.getSource('sites') as mapboxgl.GeoJSONSource | undefined;
-    source?.setData(sitesToFeatureCollection(sites));
-  }, [sites, isLoaded]);
-
   // Reflect selection state onto the map.
   useEffect(() => {
     const map = mapRef.current;
@@ -236,7 +251,7 @@ export function MapView({
     if (!map || !isLoaded) return;
     map.setStyle(isSatellite ? MAPBOX_STYLE_SATELLITE : MAPBOX_STYLE_LIGHT);
     map.once('style.load', () => {
-      map.addSource('sites', { type: 'geojson', data: sitesToFeatureCollection(sites) });
+      map.addSource('sites', { type: 'geojson', data: sitesToFeatureCollection(sites, metricValues) });
       map.addLayer({
         id: 'sites-fill',
         type: 'fill',
@@ -261,6 +276,76 @@ export function MapView({
     if (map.getLayer('sites-fill')) map.setLayoutProperty('sites-fill', 'visibility', visibility);
     if (map.getLayer('sites-outline')) map.setLayoutProperty('sites-outline', 'visibility', visibility);
   }, [layers.sites, isLoaded]);
+
+  // Keep the source data (including `metricValue`) fresh if the sites
+  // prop or metricValues change after init (e.g. switching the Analytics
+  // page's selected metric, or the sites list updating).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !isLoaded) return;
+    const source = map.getSource('sites') as mapboxgl.GeoJSONSource | undefined;
+    source?.setData(sitesToFeatureCollection(sites, metricValues));
+  }, [sites, metricValues, isLoaded]);
+
+  // Analytics visualization mode: shade fill color by relative metric
+  // intensity (data-driven `fill-color` expression) instead of the flat
+  // default color, while leaving the outline layer's selection/hover
+  // styling untouched. Reverts to the default expression when mode is
+  // 'none'. This is a UI convenience over the already-loaded dataset —
+  // not a new data source or scientific color scale.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !isLoaded || !map.getLayer('sites-fill')) return;
+
+    if (analyticsMode === 'none') {
+      map.setPaintProperty('sites-fill', 'fill-color', [
+        'case',
+        ['boolean', ['feature-state', 'selected'], false],
+        MAP_COLORS.siteFillHover,
+        ['boolean', ['feature-state', 'hover'], false],
+        MAP_COLORS.siteFillHover,
+        MAP_COLORS.siteFill,
+      ]);
+      map.setPaintProperty('sites-fill', 'fill-opacity', [
+        'case',
+        ['boolean', ['feature-state', 'selected'], false],
+        0.45,
+        ['boolean', ['feature-state', 'hover'], false],
+        0.35,
+        0.22,
+      ]);
+      return;
+    }
+
+    const values = Object.values(metricValues ?? {}).filter((v) => Number.isFinite(v));
+    const min = values.length ? Math.min(...values) : 0;
+    const max = values.length ? Math.max(...values) : 1;
+    const safeMax = max > min ? max : min + 1;
+    const color = ANALYTICS_MODE_COLORS[analyticsMode];
+
+    map.setPaintProperty('sites-fill', 'fill-color', [
+      'case',
+      ['==', ['get', 'metricValue'], null],
+      MAP_COLORS.siteFill,
+      [
+        'interpolate',
+        ['linear'],
+        ['get', 'metricValue'],
+        min,
+        color.low,
+        safeMax,
+        color.high,
+      ],
+    ]);
+    map.setPaintProperty('sites-fill', 'fill-opacity', [
+      'case',
+      ['boolean', ['feature-state', 'selected'], false],
+      0.75,
+      ['boolean', ['feature-state', 'hover'], false],
+      0.65,
+      0.55,
+    ]);
+  }, [analyticsMode, metricValues, isLoaded]);
 
   if (loadError) {
     return (
@@ -315,6 +400,8 @@ export function MapView({
           {isSatellite ? 'Map' : 'Satellite'}
         </button>
       )}
+
+      {isLoaded && analyticsMode !== 'none' && <AnalyticsMapLegend mode={analyticsMode} />}
     </div>
   );
 }

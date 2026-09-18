@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DashboardLayout } from '../../components/DashboardLayout/DashboardLayout';
 import { KpiCard } from '../../components/KpiCard/KpiCard';
+import { KpiCardSkeleton } from '../../components/LoadingSkeleton/LoadingSkeleton';
 import { MapView } from '../../components/MapView/MapView';
 import { SiteTable } from '../../components/SiteTable/SiteTable';
 import { StatusBadge } from '../../components/StatusBadge/StatusBadge';
@@ -9,10 +10,11 @@ import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { SiteDetailsPanel } from '../../components/SiteDetailsPanel/SiteDetailsPanel';
 import { getApiErrorMessage } from '../../services/apiError';
+import { analyticsService } from '../../services/analyticsService';
 import { useMapStore } from '../../store/mapStore';
 import { useProjectStore } from '../../store/projectStore';
 import { useSiteStore } from '../../store/siteStore';
-import type { Project } from '../../types/dashboard';
+import type { Project, ProjectAnalyticsResponse } from '../../types/dashboard';
 
 /** /projects/:projectId — single project detail with KPIs, map, and site list. */
 export function ProjectDetailPage() {
@@ -71,6 +73,28 @@ export function ProjectDetailPage() {
     return () => setSelectedSiteId(null);
   }, [setSelectedSiteId]);
 
+  const [analytics, setAnalytics] = useState<ProjectAnalyticsResponse | null>(null);
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(true);
+
+  const loadAnalytics = useCallback(async () => {
+    if (!projectId) return;
+    setIsLoadingAnalytics(true);
+    try {
+      const data = await analyticsService.getProjectAnalytics(projectId);
+      setAnalytics(data);
+    } catch {
+      // Non-fatal — the KPI cards simply fall back to "No data available".
+      setAnalytics(null);
+    } finally {
+      setIsLoadingAnalytics(false);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadAnalytics();
+  }, [loadAnalytics]);
+
   if (isLoadingProject) {
     return (
       <DashboardLayout pageTitle="Loading…">
@@ -124,12 +148,32 @@ export function ProjectDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-          <KpiCard icon="pin_drop" label="Sites" target={project.site_count} />
-          <KpiCard icon="satellite_alt" label="Area" target={project.total_area_hectares} suffix=" ha" formatValue={(v) => v.toLocaleString()} />
-          <KpiCard icon="co2" label="Carbon" staticValue="—" description="No monitoring data" tone="accent" />
-          <KpiCard icon="eco" label="Biodiversity" staticValue="—" description="No monitoring data" />
-        </div>
+        {isLoadingAnalytics ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            {Array.from({ length: 4 }).map((_, i) => <KpiCardSkeleton key={i} />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <KpiCard icon="pin_drop" label="Sites" target={project.site_count} />
+            <KpiCard icon="satellite_alt" label="Area" target={project.total_area_hectares} suffix=" ha" formatValue={(v) => v.toLocaleString()} />
+            <KpiCard
+              icon="co2"
+              label="Carbon"
+              target={analytics?.summary.carbon_total ?? undefined}
+              staticValue={analytics?.summary.carbon_total == null ? 'No data available' : undefined}
+              suffix={analytics?.summary.carbon_total != null ? ' tCO\u2082e' : undefined}
+              formatValue={(v) => v.toLocaleString()}
+              tone="accent"
+            />
+            <KpiCard
+              icon="eco"
+              label="Biodiversity"
+              target={analytics?.summary.avg_biodiversity_score ?? undefined}
+              staticValue={analytics?.summary.avg_biodiversity_score == null ? 'No data available' : undefined}
+              suffix={analytics?.summary.avg_biodiversity_score != null ? ' / 100' : undefined}
+            />
+          </div>
+        )}
 
         <div className="bg-surface-container-lowest rounded-2xl shadow-sm p-space-sm md:p-space-md">
           <h3 className="font-headline-sm text-headline-sm text-primary mb-space-sm px-space-sm">Project Map</h3>

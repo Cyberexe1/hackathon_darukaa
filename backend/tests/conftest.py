@@ -14,6 +14,7 @@ import string
 import pytest
 from fastapi.testclient import TestClient
 
+from app.core.rate_limit import auth_rate_limiter
 from app.db.session import SessionLocal
 from app.main import app
 from app.models.user import User
@@ -21,6 +22,24 @@ from app.models.user import User
 
 def _random_suffix(n: int = 10) -> str:
     return "".join(random.choices(string.ascii_lowercase + string.digits, k=n))
+
+
+@pytest.fixture(autouse=True)
+def _relax_auth_rate_limit():
+    """The auth rate limiter (see app/core/rate_limit.py) is in-process,
+    in-memory state that persists for the lifetime of the Python process
+    running pytest — every test in this session signs up its own throwaway
+    user via the `make_user`/`auth_headers` fixtures, which would trip the
+    production 10-requests/60s limit long before the suite finishes and
+    fail unrelated tests with spurious 429s. Raise the limit for the
+    duration of the test session instead of disabling the feature
+    entirely, so a dedicated rate-limit test (if added) can still exercise
+    the real mechanism by constructing its own limiter instance.
+    """
+    original_max = auth_rate_limiter.max_requests
+    auth_rate_limiter.max_requests = 10_000
+    yield
+    auth_rate_limiter.max_requests = original_max
 
 
 @pytest.fixture()
@@ -70,13 +89,15 @@ def auth_headers(make_user):
 
 VALID_POLYGON = {
     "type": "Polygon",
-    "coordinates": [[
-        [73.0, 19.0],
-        [73.01, 19.0],
-        [73.01, 19.01],
-        [73.0, 19.01],
-        [73.0, 19.0],
-    ]],
+    "coordinates": [
+        [
+            [73.0, 19.0],
+            [73.01, 19.0],
+            [73.01, 19.01],
+            [73.0, 19.01],
+            [73.0, 19.0],
+        ]
+    ],
 }
 
 

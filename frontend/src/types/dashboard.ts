@@ -62,12 +62,115 @@ export interface Site {
 export interface SiteMetric {
   id: string;
   site_id: string;
+  /** ISO date (YYYY-MM-DD) the measurement represents. */
+  recorded_at: string;
+  carbon_tco2e: number;
+  /** 0-100. */
+  biodiversity_score: number;
+  /** Normalized index, 0-1. */
+  vegetation_index: number;
+  /** 0-100. */
+  tree_cover_percentage: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Payload for creating/editing a measurement via the Add/Edit Measurement UI. */
+export interface SiteMetricInput {
   recorded_at: string;
   carbon_tco2e: number;
   biodiversity_score: number;
   vegetation_index: number;
   tree_cover_percentage: number;
 }
+
+/**
+ * Real analytics response types, matching the FastAPI response schemas
+ * exactly (see backend/app/schemas/analytics.py). Unlike the legacy
+ * `DashboardOverview`/`PerformanceSummary`/`SiteAnalytics` types below
+ * (kept only for the now-unused mock data layer), every numeric field
+ * here that can't yet be computed from real data is `null` — the UI must
+ * render "No data available" / "Insufficient historical data" rather
+ * than treating `null` as zero.
+ */
+export interface SiteAnalyticsSite {
+  id: string;
+  name: string;
+  area_hectares: number;
+  status: string;
+}
+
+export interface SiteAnalyticsSummary {
+  carbon_total: number | null;
+  biodiversity_current: number | null;
+  vegetation_current: number | null;
+  tree_cover_current: number | null;
+  first_recorded_at: string | null;
+  last_recorded_at: string | null;
+}
+
+export interface PerformanceChange {
+  has_sufficient_data: boolean;
+  carbon_change_pct: number | null;
+  biodiversity_change_pct: number | null;
+  vegetation_change_pct: number | null;
+  tree_cover_change_pct: number | null;
+}
+
+export interface SiteAnalyticsResponse {
+  site: SiteAnalyticsSite;
+  summary: SiteAnalyticsSummary;
+  performance: PerformanceChange;
+  /** Sorted ascending by recorded_at. Empty when the site has no metrics. */
+  historical: SiteMetric[];
+}
+
+/** One bucketed year of metrics aggregated across multiple sites (sum for
+ * carbon, average for the rest) — used for project/dashboard-level trend
+ * charts, since records from different sites rarely share an exact date. */
+export interface YearAggregatePoint {
+  year: number;
+  carbon_tco2e: number;
+  biodiversity_score: number;
+  vegetation_index: number;
+  tree_cover_percentage: number;
+}
+
+export interface ProjectAnalyticsProject {
+  id: string;
+  name: string;
+  site_count: number;
+  total_area_hectares: number;
+  status: string;
+}
+
+export interface ProjectAnalyticsSummary {
+  carbon_total: number | null;
+  avg_biodiversity_score: number | null;
+  avg_vegetation_index: number | null;
+  avg_tree_cover_percentage: number | null;
+}
+
+export interface ProjectAnalyticsResponse {
+  project: ProjectAnalyticsProject;
+  summary: ProjectAnalyticsSummary;
+  historical: YearAggregatePoint[];
+}
+
+export interface DashboardAnalyticsResponse {
+  total_projects: number;
+  total_sites: number;
+  total_area_hectares: number;
+  active_sites: number;
+  carbon_total: number | null;
+  avg_biodiversity_score: number | null;
+  avg_vegetation_index: number | null;
+  avg_tree_cover_percentage: number | null;
+  historical: YearAggregatePoint[];
+}
+
+/** Time range filter for historical analytics views. */
+export type AnalyticsTimeRange = '1y' | '3y' | '5y' | 'all';
 
 export type SiteEventType = 'created' | 'updated' | 'boundary_saved' | 'analytics_synced';
 
@@ -80,35 +183,11 @@ export interface SiteEvent {
   created_at: string;
 }
 
-/** Time-series point used by analytics charts (Highcharts-ready). */
-export interface MetricYearPoint {
-  year: number;
+/** Generic labeled data point used by the shared Highcharts components
+ * (CarbonChart, BiodiversityChart, etc). `label` is either an ISO date
+ * (site-level historical data) or a year string (project/dashboard-level
+ * aggregated data) — charts just render it as an x-axis category. */
+export interface ChartPoint {
+  label: string;
   value: number;
-}
-
-/** Combined analytics payload for a single site across all tracked years. */
-export interface SiteAnalytics {
-  site_id: string;
-  carbon: MetricYearPoint[];
-  biodiversity: MetricYearPoint[];
-  vegetation: MetricYearPoint[];
-}
-
-/** Aggregate KPI figures shown on the dashboard overview. */
-export interface DashboardOverview {
-  total_projects: number;
-  total_sites: number;
-  total_area_hectares: number;
-  total_carbon_tco2e: number;
-  avg_biodiversity_score: number;
-  avg_vegetation_index: number;
-  active_sites: number;
-  projects_this_year: number;
-}
-
-export interface PerformanceSummary {
-  carbon_change_pct: number;
-  biodiversity_change_pct: number;
-  vegetation_change_pct: number;
-  area_hectares: number;
 }

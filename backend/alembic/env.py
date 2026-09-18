@@ -15,6 +15,7 @@ from app.db.session import Base  # noqa: E402
 from app.models.user import User  # noqa: E402,F401  (ensures model is registered on Base.metadata)
 from app.models.project import Project  # noqa: E402,F401
 from app.models.site import Site  # noqa: E402,F401
+from app.models.site_metric import SiteMetric  # noqa: E402,F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

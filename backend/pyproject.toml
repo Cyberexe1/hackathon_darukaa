@@ -1,0 +1,38 @@
+[project]
+name = "darukaa-earth-backend"
+version = "0.1.0"
+description = "Darukaa.Earth FastAPI backend: JWT auth, PostGIS geospatial project/site management, environmental analytics."
+requires-python = ">=3.13,<3.14"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+exclude = [".venv", "alembic/versions"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501", # line length handled by the formatter/line-length setting, not worth hard-failing CI on
+    "B008", # FastAPI's dependency-injection pattern (`= Depends(...)`) is idiomatic and requires a call in the default argument
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
+# SQLAlchemy `relationship("ClassName")` forward references are resolved
+# at ORM-mapper-configuration time, not at module-import time — Ruff
+# can't see that and flags them as undefined names.
+"app/models/*.py" = ["F821"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

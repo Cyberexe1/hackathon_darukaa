@@ -49,17 +49,13 @@ DEMO_PROJECTS: list[dict] = [
                 "name": "[DEMO] Site A — Ridge Block",
                 "description": "Demo site boundary.",
                 "status": "Active",
-                "geometry": _polygon(
-                    [[73.40, 18.90], [73.42, 18.90], [73.42, 18.92], [73.40, 18.92]]
-                ),
+                "geometry": _polygon([[73.40, 18.90], [73.42, 18.90], [73.42, 18.92], [73.40, 18.92]]),
             },
             {
                 "name": "[DEMO] Site B — Valley Block",
                 "description": "Demo site boundary.",
                 "status": "Verified",
-                "geometry": _polygon(
-                    [[73.44, 18.88], [73.47, 18.88], [73.47, 18.90], [73.44, 18.90]]
-                ),
+                "geometry": _polygon([[73.44, 18.88], [73.47, 18.88], [73.47, 18.90], [73.44, 18.90]]),
             },
         ],
     },
@@ -77,9 +73,7 @@ DEMO_PROJECTS: list[dict] = [
                 "name": "[DEMO] Delta Plot 1",
                 "description": "Demo site boundary.",
                 "status": "In Review",
-                "geometry": _polygon(
-                    [[88.80, 21.90], [88.83, 21.90], [88.83, 21.93], [88.80, 21.93]]
-                ),
+                "geometry": _polygon([[88.80, 21.90], [88.83, 21.90], [88.83, 21.93], [88.80, 21.93]]),
             },
         ],
     },

@@ -26,9 +26,7 @@ def test_create_project_invalid_status(client: TestClient, auth_headers):
 
 
 def test_create_project_invalid_project_type(client: TestClient, auth_headers):
-    response = client.post(
-        "/projects", json=make_project_payload(project_type="Not A Real Type"), headers=auth_headers
-    )
+    response = client.post("/projects", json=make_project_payload(project_type="Not A Real Type"), headers=auth_headers)
     assert response.status_code == 422
 
 

@@ -4,7 +4,7 @@ Route handlers stay thin (parse request, call service, return response);
 all query/authorization logic lives here so it's independently testable.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
@@ -120,12 +120,14 @@ def update_project(db: Session, current_user: User, project_id: str, payload: Pr
             detail="End date cannot be before the start date.",
         )
 
-    project.updated_at = datetime.now(timezone.utc)
+    project.updated_at = datetime.now(UTC)
     db.commit()
     db.refresh(project)
 
     site_count = db.scalar(select(func.count(Site.id)).where(Site.project_id == project.id)) or 0
-    total_area = db.scalar(select(func.coalesce(func.sum(Site.area_hectares), 0)).where(Site.project_id == project.id)) or 0
+    total_area = (
+        db.scalar(select(func.coalesce(func.sum(Site.area_hectares), 0)).where(Site.project_id == project.id)) or 0
+    )
     return _to_out(project, site_count, total_area)
 
 

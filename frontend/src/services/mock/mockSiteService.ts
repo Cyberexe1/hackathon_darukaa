@@ -1,6 +1,5 @@
 import type { GeoJSONPolygon, Site, SiteStatus } from '../../types/dashboard';
 import { mockSites, getSiteById, getSitesByProjectId } from '../../mocks/mockSites';
-import { getLatestMetricForSite } from '../../mocks/mockMetrics';
 
 const LATENCY_MS = 350;
 
@@ -55,9 +54,5 @@ export const mockSiteService = {
     };
     sites = [newSite, ...sites];
     return delay(newSite, 600);
-  },
-
-  async getLatestMetric(siteId: string) {
-    return delay(getLatestMetricForSite(siteId));
   },
 };

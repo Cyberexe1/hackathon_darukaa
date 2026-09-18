@@ -13,9 +13,9 @@ import json
 from typing import Any
 
 from geoalchemy2.shape import from_shape, to_shape
+from geoalchemy2.types import Geography
 from shapely.geometry import Polygon, mapping, shape
 from shapely.geometry.base import BaseGeometry
-from geoalchemy2.types import Geography
 from sqlalchemy import bindparam, cast, func, select
 from sqlalchemy.orm import Session
 

@@ -3,7 +3,7 @@ conversion, authoritative spatial measurements, and ownership
 authorization (via the parent Project's `created_by`).
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -131,7 +131,7 @@ def update_site(db: Session, current_user: User, site_id: str, payload: SiteUpda
         site.centroid_lat = summary.centroid_lat
         site.centroid_lon = summary.centroid_lon
 
-    site.updated_at = datetime.now(timezone.utc)
+    site.updated_at = datetime.now(UTC)
     db.commit()
     db.refresh(site)
     return _to_out(site)

@@ -1,8 +1,13 @@
 import axios from 'axios';
 
-// Base URL for the future FastAPI backend. Falls back to a relative path
-// so the client builds cleanly even without an env var configured yet.
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
+// Base URL for the FastAPI backend. `VITE_API_URL` is the canonical name
+// (matches the deployment docs/CI); `VITE_API_BASE_URL` is accepted as a
+// backward-compatible alias for existing local .env files. Falls back to
+// a relative path so the client still builds without either configured.
+// This must never be a hardcoded absolute URL (dev or prod) — always
+// read from the build-time env var so the same build artifact works
+// against whichever backend it's deployed alongside.
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

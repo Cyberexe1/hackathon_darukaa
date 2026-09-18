@@ -1,6 +1,6 @@
 """Password hashing (bcrypt) and JWT encode/decode helpers."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import bcrypt
 import jwt
@@ -26,16 +26,20 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(subject: str) -> str:
     """Create a signed JWT with `subject` (the user id) as the `sub` claim."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {"sub": subject, "iat": now, "exp": expire}
-    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    # Never log this token or its payload — it's a bearer credential.
+    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 
 def decode_access_token(token: str) -> str:
     """Decode a JWT and return the `sub` claim (user id).
 
-    Raises jwt.PyJWTError (or subclasses) if the token is invalid/expired.
+    Raises jwt.PyJWTError (or subclasses) if the token is invalid, expired,
+    or malformed. Callers must not log the raw token or include it in any
+    error response — see app/api/deps.py, which surfaces only a generic
+    "Invalid or expired token" message.
     """
-    payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
+    payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
     return payload["sub"]
