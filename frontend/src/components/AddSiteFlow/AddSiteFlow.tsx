@@ -269,6 +269,7 @@ export function AddSiteFlow({
             onPolygonChange={handlePolygonChange}
             className="h-[360px] md:h-[420px]"
             initialFeature={initialFeature}
+            onNext={goNext}
           />
           {!polygonFeature && (
             <p className="font-label-technical text-label-micro text-on-surface-variant">

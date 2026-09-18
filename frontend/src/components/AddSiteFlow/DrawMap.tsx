@@ -27,6 +27,16 @@ interface DrawMapProps {
    * to original" — Cancel in the parent flow simply discards the whole
    * in-progress edit instead). */
   initialFeature?: Feature<Polygon> | null;
+  /**
+   * Optional "advance to the next wizard step" action, rendered as a
+   * button directly under the draw controls so the user can move on
+   * without reaching for the modal's footer. DrawMap itself has no
+   * concept of wizard steps/saving — this only ever calls back into
+   * whatever the parent flow wants to do next (e.g. `AddSiteFlow`'s own
+   * `goNext`, which the existing footer "Next"/"Save Site" button also
+   * uses). Hidden entirely when omitted, or while no polygon exists yet.
+   */
+  onNext?: () => void;
 }
 
 /**
@@ -41,7 +51,12 @@ interface DrawMapProps {
  * every create/update/delete so the parent step can compute geometry
  * stats.
  */
-export function DrawMap({ onPolygonChange, className = '', initialFeature = null }: DrawMapProps) {
+export function DrawMap({
+  onPolygonChange,
+  className = '',
+  initialFeature = null,
+  onNext,
+}: DrawMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const drawRef = useRef<MapboxDraw | null>(null);
@@ -49,6 +64,10 @@ export function DrawMap({ onPolygonChange, className = '', initialFeature = null
   const [runtimeError, setRuntimeError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
   const [drawMode, setDrawMode] = useState<string>('simple_select');
+  // Mirrors whether a polygon currently exists, purely to decide whether
+  // to show the in-map "Next" button — the actual feature data always
+  // flows to the parent via `onPolygonChange`, this never reads it back.
+  const [hasPolygon, setHasPolygon] = useState(false);
   // Missing token is a static config problem, not runtime state — compute
   // it directly each render instead of syncing it into state via an effect.
   const loadError = !MAPBOX_TOKEN || runtimeError;
@@ -134,6 +153,7 @@ export function DrawMap({ onPolygonChange, className = '', initialFeature = null
         | Feature<Polygon>
         | undefined;
       onPolygonChange(polygonFeature ?? null);
+      setHasPolygon(Boolean(polygonFeature));
     };
 
     // Only keep the most recently drawn polygon — remove older ones.
@@ -217,6 +237,7 @@ export function DrawMap({ onPolygonChange, className = '', initialFeature = null
     // boundary replaces whatever was there before.
     draw.deleteAll();
     onPolygonChange(null);
+    setHasPolygon(false);
     draw.changeMode('draw_polygon');
     setDrawMode('draw_polygon');
   };
@@ -262,32 +283,47 @@ export function DrawMap({ onPolygonChange, className = '', initialFeature = null
       {isLoaded && (
         // Positioned bottom-right, clear of Mapbox's own zoom (+/-) and
         // trash controls (top-right, added above via `addControl`).
-        <div className="absolute bottom-3 right-3 z-10 flex gap-space-sm">
-          <button
-            type="button"
-            onClick={startDrawPoints}
-            aria-pressed={drawMode === 'draw_polygon'}
-            className={`inline-flex items-center gap-1.5 px-space-sm py-1.5 rounded-lg font-label-technical text-label-micro shadow-md backdrop-blur-md border border-outline-variant/40 transition-colors ${
-              drawMode === 'draw_polygon'
-                ? 'bg-primary-container text-on-primary'
-                : 'bg-surface-container-lowest/95 text-on-surface hover:bg-surface-container'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-              edit_location_alt
-            </span>
-            Draw Points
-          </button>
-          {drawMode === 'draw_polygon' && (
+        // `bottom-[22px]` = the original `bottom-3` (12px) + 10px.
+        <div className="absolute bottom-[22px] right-3 z-10 flex flex-col items-end gap-space-sm">
+          <div className="flex gap-space-sm">
             <button
               type="button"
-              onClick={finishDrawing}
-              className="inline-flex items-center gap-1.5 px-space-sm py-1.5 rounded-lg font-label-technical text-label-micro shadow-md backdrop-blur-md border border-outline-variant/40 transition-colors bg-primary text-on-primary hover:bg-primary/90"
+              onClick={startDrawPoints}
+              aria-pressed={drawMode === 'draw_polygon'}
+              className={`inline-flex items-center gap-1.5 px-space-sm py-1.5 rounded-lg font-label-technical text-label-micro shadow-md backdrop-blur-md border border-outline-variant/40 transition-colors ${
+                drawMode === 'draw_polygon'
+                  ? 'bg-primary-container text-on-primary'
+                  : 'bg-surface-container-lowest/95 text-on-surface hover:bg-surface-container'
+              }`}
             >
               <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                check
+                edit_location_alt
               </span>
-              Finish
+              Draw Points
+            </button>
+            {drawMode === 'draw_polygon' && (
+              <button
+                type="button"
+                onClick={finishDrawing}
+                className="inline-flex items-center gap-1.5 px-space-sm py-1.5 rounded-lg font-label-technical text-label-micro shadow-md backdrop-blur-md border border-outline-variant/40 transition-colors bg-primary text-on-primary hover:bg-primary/90"
+              >
+                <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                  check
+                </span>
+                Finish
+              </button>
+            )}
+          </div>
+          {onNext && hasPolygon && drawMode !== 'draw_polygon' && (
+            <button
+              type="button"
+              onClick={onNext}
+              className="inline-flex items-center gap-1.5 px-space-sm py-1.5 rounded-lg font-label-technical text-label-micro shadow-md backdrop-blur-md border border-outline-variant/40 transition-colors bg-primary text-on-primary hover:bg-primary/90"
+            >
+              Next
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
+                arrow_forward
+              </span>
             </button>
           )}
         </div>
